@@ -16,7 +16,7 @@ from preprocessing.utils import single_score
 from layers.interaction import SENETLayer
 
 class DAT(DualTower):
-    """DSSM双塔模型"""
+    """https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_4.pdf"""
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
                  dnn_hidden_units=(300, 300, 32), dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout = 0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None):
@@ -35,7 +35,6 @@ class DAT(DualTower):
         self.dnn_dropout = dnn_dropout
         self.dnn_use_bn = dnn_use_bn
         self.init_std = init_std
-        self.device = device
         self.gamma = gamma
         self.l2_reg_embedding = l2_reg_embedding
         self.seed = seed
@@ -60,12 +59,7 @@ class DAT(DualTower):
         if len(self.user_dnn_feature_columns) > 0:
             user_sparse_embedding_list, user_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.user_dnn_feature_columns, self.user_embedding_dict)
-
-
-            user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape)
-
             # print(user_sparse_embedding_list,len(user_sparse_embedding_list))
-            #
             # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
             if torch.cuda.is_available():
