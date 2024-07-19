@@ -1,0 +1,5 @@
+2024-07-19 21:00:51,740 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:91] - INFO: 文件夹'./checkpoints'已存在。
+2024-07-19 21:00:51,794 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:55] - INFO: model_name wide_and_deep
+2024-07-19 21:00:53,188 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:132] - INFO: model_name = wide_and_deep; evaluate:{'auc': 0.9836734693877551, 'accuracy': 0.9074074074074074, 'logloss': 0.6866679440369865}
+2024-07-19 21:00:53,194 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:136] - INFO: model_name = wide_and_deep; test LogLoss, 0.6888
+2024-07-19 21:00:53,196 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:137] - INFO: model_name = wide_and_deep; test AUC, 0.9167
