@@ -15,7 +15,7 @@ class WideDeep(BaseModel):
                                        device=device, gpus=gpus)
 
         self.field_size = len(self.embedding_dict)
-        self.sim_non_local = SimNonLocal(self.field_size, 3, seed, device)
+        # self.sim_non_local = SimNonLocal(self.field_size, 3, seed, device)
         self.use_dnn = len(dnn_feature_columns) > 0 and len(dnn_hidden_units) > 0
 
         if self.use_dnn:
@@ -36,8 +36,8 @@ class WideDeep(BaseModel):
 
         if self.use_dnn:
             sparse_embedding = torch.cat(sparse_embedding_list, dim=1)
-            se_embedding = self.sim_non_local(sparse_embedding)
-            sparse_dnn_input = torch.flatten(se_embedding, start_dim=1)
+            # se_embedding = self.sim_non_local(sparse_embedding)
+            sparse_dnn_input = torch.flatten(sparse_embedding, start_dim=1)
 
             dense_dnn_input = torch.flatten(torch.cat(dense_value_list, dim=-1), start_dim=1)
             dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)

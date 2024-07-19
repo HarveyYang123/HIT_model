@@ -20,9 +20,8 @@ from model.dat import DAT
 from model.cold import Cold
 from model.autoint import AutoInt
 from model.wdm import WideDeep
-from model.dual_tower import DualTower
 
-from deepctr_torch.callbacks import EarlyStopping, ModelCheckpoint
+from utils.callbacks import EarlyStopping, ModelCheckpoint
 
 
 # 删掉rating=3的样本，rating>3的样本为正样本（设置rating=1），rating<3的样本为负样本（设置rating=0）。
@@ -107,8 +106,8 @@ def setup_seed(seed):
 
 if __name__ == "__main__":
     use_cuda, cuda_number = True, 'cuda:0'
-    # ["int_tower", "dssm", "dual_tower", "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep"]
-    model_name = "int_tower"
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep"]
+    model_name = "wide_and_deep"
     data_path = './data/movielens_test.txt'
     ckpt_fold = './checkpoints'
 
@@ -206,11 +205,10 @@ if __name__ == "__main__":
         model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
                          device=device, user_head=32, item_head=32, user_filed_size=5, item_filed_size=2)
     elif model_name == "dssm":
+        print("model_name dssm")
         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
-    elif model_name == "dual_tower":
-        model = DualTower(user_feature_columns, item_feature_columns, task='binary',
-                          device=device)
     elif model_name == "dat":
+        print("model_name dat")
         model = DAT(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
                     device=device)
     elif model_name == "deep_fm":
@@ -226,6 +224,7 @@ if __name__ == "__main__":
         model = AutoInt(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
                         device=device)
     elif model_name == "wide_and_deep":
+        print("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
                          device=device)
     else:

@@ -14,7 +14,6 @@ from preprocessing.utils import col_score
 from preprocessing.utils import col_score_2
 from preprocessing.utils import single_score
 from layers.interaction import SENETLayer
-# from layers.interaction import SimNonLocal
 
 class DAT(DualTower):
     """DSSM双塔模型"""
@@ -25,19 +24,18 @@ class DAT(DualTower):
                                     l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                     device=device, gpus=gpus)
 
-        if len(user_dnn_feature_columns) > 0:
 
-            self.user_dnn = DNN(352, dnn_hidden_units,
-                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                use_bn=dnn_use_bn, init_std=init_std, device=device)
-            self.user_dnn_embedding = None
 
-        if len(item_dnn_feature_columns) > 0:
-            self.item_dnn = DNN(225, dnn_hidden_units,
-                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                use_bn=dnn_use_bn, init_std=init_std, device=device)
-            self.item_dnn_embedding = None
+        self.item_dnn_feature_columns = item_dnn_feature_columns
 
+        self.user_dnn_feature_columns = user_dnn_feature_columns
+        self.dnn_hidden_units = dnn_hidden_units
+        self.dnn_activation = dnn_activation
+        self.l2_reg_dnn = l2_reg_dnn
+        self.dnn_dropout = dnn_dropout
+        self.dnn_use_bn = dnn_use_bn
+        self.init_std = init_std
+        self.device = device
         self.gamma = gamma
         self.l2_reg_embedding = l2_reg_embedding
         self.seed = seed
@@ -52,8 +50,6 @@ class DAT(DualTower):
 
         self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
         self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
-        # self.User_sim_non_local = SimNonLocal(self.user_filed_size, 3, seed, device)
-        # self.Item_sim_non_local = SimNonLocal(self.item_filed_size, 3, seed, device)
 
         # self.dense = torch.nn.Linear(128*len(self.user_dnn_feature_columns),1).cuda()
         #
@@ -72,12 +68,22 @@ class DAT(DualTower):
             #
             # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
-            self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape).cuda()
+            if torch.cuda.is_available():
+                self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape).cuda()
+            else:
+                self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape)
 
 
             user_sparse_embedding_list.append(self.user_aug_vector)
 
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
+
+            if len(self.user_dnn_feature_columns) > 0:
+                print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
+                self.user_dnn = DNN(user_dnn_input.size()[-1], self.dnn_hidden_units, activation=self.dnn_activation,
+                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
+                self.user_dnn_embedding = None
 
             self.user_dnn_embedding = self.user_dnn(user_dnn_input)
 
@@ -103,11 +109,21 @@ class DAT(DualTower):
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
 
-            self.item_aug_vector = torch.rand(item_sparse_embedding_list[-1].shape).cuda()
+            if torch.cuda.is_available():
+                self.item_aug_vector = torch.rand(item_sparse_embedding_list[-1].shape).cuda()
+            else:
+                self.item_aug_vector = torch.rand(item_sparse_embedding_list[-1].shape)
 
             item_sparse_embedding_list.append(self.item_aug_vector)
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # print(item_dnn_input.shape)
+
+            if len(self.item_dnn_feature_columns) > 0:
+                self.item_dnn = DNN(item_dnn_input.size()[-1], self.dnn_hidden_units,
+                                    activation=self.dnn_activation, l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
+                self.item_dnn_embedding = None
+
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
 
             # item_sparse_embedding = torch.cat(item_sparse_embedding_list, dim=1)
