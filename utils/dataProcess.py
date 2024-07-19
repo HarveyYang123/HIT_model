@@ -189,6 +189,7 @@ class amazonDataProcess():
                                                                                    item_dense_features]
 
         self.train_model_input = {name: self.train[name] for name in sparse_features + dense_features}
+        self.test_model_input = {name: self.test[name] for name in sparse_features + dense_features}
 
     def data_process(self, data_path):
         data = pd.read_csv(data_path)
