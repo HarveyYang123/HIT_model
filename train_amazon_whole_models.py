@@ -19,7 +19,7 @@ from model.TimTower import TimTower
 
 from utils.callbacks import EarlyStopping, ModelCheckpoint
 from utils.logging import Logger
-from utils.dataProcess import movieDataProcess, setup_seed
+from utils.dataProcess import amazonDataProcess, setup_seed
 
 
 def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
@@ -27,7 +27,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
     if model_name == "int_tower":
         log.logger.info("model_name int_tower")
         model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=5, item_filed_size=2)
+                         device=device, user_head=32, item_head=32, user_filed_size=1, item_filed_size=2)
     elif model_name == "dssm":
         log.logger.info("model_name dssm")
         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
@@ -68,7 +68,6 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
     return model
 
 def main(args, log):
-    use_cuda, cuda_number = True, 'cuda:0'
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim_tower"]
     model_name = args.model_name
     ckpt_fold = args.ckpt_fold
@@ -90,14 +89,13 @@ def main(args, log):
     else:
         log.logger.info(f"文件夹'{ckpt_fold}'已存在。")
 
-    movieData = movieDataProcess(log, args.data_path, embedding_dim)
+    Data = amazonDataProcess(log, args.data_path, embedding_dim)
 
     # Define Model,train,predict and evaluate
     device = 'cpu'
-    if use_cuda and torch.cuda.is_available():
+    if args.use_cuda and torch.cuda.is_available():
         log.logger.info('cuda ready...')
-        device = cuda_number
-
+        device = 'cuda:0'
 
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
                        patience=5, mode='max', baseline=None)
@@ -105,9 +103,9 @@ def main(args, log):
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
     # 仅用于非双塔的模型
-    linear_feature_columns = movieData.user_feature_columns + movieData.item_feature_columns
-    user_feature_columns = movieData.user_feature_columns
-    item_feature_columns = movieData.item_feature_columns
+    linear_feature_columns = Data.user_feature_columns + Data.item_feature_columns
+    user_feature_columns = Data.user_feature_columns
+    item_feature_columns = Data.item_feature_columns
     dnn_feature_columns = linear_feature_columns
 
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
@@ -115,7 +113,7 @@ def main(args, log):
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss']
                   , lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
-    model.fit(movieData.train_model_input, movieData.train[movieData.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
+    model.fit(Data.train_model_input, Data.train[Data.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
               validation_split=0.2,
               callbacks=[es, mdckpt])
 
@@ -123,27 +121,25 @@ def main(args, log):
     model.load_state_dict(torch.load(ckpt_path))
     model.eval()
 
-
-
-    # %%
-    # 6.Evaluate
+    # Evaluate
     # 看下最佳模型在完整的训练集上的表现
-    eval_tr = model.evaluate(movieData.train_model_input, movieData.train[movieData.target].values)
+    eval_tr = model.evaluate(Data.train_model_input, Data.train[Data.target].values)
     log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
 
     # %%
-    pred_ts = model.predict(movieData.test_model_input, batch_size=2048)
-    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(movieData.test[movieData.target].values, pred_ts), 4)}")
-    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(movieData.test[movieData.target].values, pred_ts), 4)}")
+    pred_ts = model.predict(Data.test_model_input, batch_size=2048)
+    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(Data.test[Data.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(Data.test[Data.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim_tower"]
-    parser.add_argument("--model_name", type=str, default="wide_and_deep")
-    parser.add_argument("--data_path", type=str, default="./data/amazon_eletronics.txt")
+    parser.add_argument("--model_name", type=str, default="int_tower")
+    parser.add_argument("--data_path", type=str, default="./data/amazon_eletronics.csv")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=10)
+    parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)

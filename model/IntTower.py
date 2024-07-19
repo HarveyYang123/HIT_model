@@ -64,6 +64,7 @@ class IntTower(BaseTower):
                 self.input_from_feature_columns(inputs, self.user_dnn_feature_columns, self.user_embedding_dict)
 
             user_sparse_embedding = torch.cat(user_sparse_embedding_list, dim=1)
+
             User_sim_embedding = self.User_sim_non_local(user_sparse_embedding)
             sparse_dnn_input = torch.flatten(User_sim_embedding, start_dim=1)
             if(len(user_dense_value_list)>0):
