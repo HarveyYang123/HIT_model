@@ -15,7 +15,7 @@ from model.dat import DAT
 from model.cold import Cold
 from model.autoint import AutoInt
 from model.wdm import WideDeep
-from model.TimTower import TimTower
+from model.tim import TimTower
 
 from utils.callbacks import EarlyStopping, ModelCheckpoint
 from utils.logging import Logger
@@ -55,10 +55,10 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
                          device=device)
-    elif model_name == "tim_tower":
-        log.logger.info("model_name tim_tower")
-        model = TimTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=5, item_filed_size=2)
+    elif model_name == "tim":
+        log.logger.info("model_name tim")
+        model = TimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
+                    device=device)
     else:
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
@@ -138,8 +138,8 @@ def main(args, log):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim_tower"]
-    parser.add_argument("--model_name", type=str, default="wide_and_deep")
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
+    parser.add_argument("--model_name", type=str, default="tim")
     parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
