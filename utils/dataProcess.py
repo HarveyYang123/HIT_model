@@ -17,6 +17,8 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
+
+
 class movieDataProcess():
     def __init__(self, log, data_path, embedding_dim):
         self.log = log
@@ -217,6 +219,111 @@ class amazonDataProcess():
         data_group = data[['asin', 'overall']].groupby('asin').agg('mean').reset_index()
         data_group.rename(columns={'overall': 'item_mean_rating'}, inplace=True)
         data = pd.merge(data_group, data, on='asin')
+        return data
+
+    def get_var_feature(self, data, col):
+        key2index = {}
+
+        def split(x):
+            key_ans = x.split('|')
+            for key in key_ans:
+                if key not in key2index:
+                    # Notice : input value 0 is a special "padding",\
+                    # so we do not use 0 to encode valid feature for sequence input
+                    key2index[key] = len(key2index) + 1
+            return list(map(lambda x: key2index[x], key_ans))
+
+        var_feature = list(map(split, data[col].values))
+        var_feature_length = np.array(list(map(len, var_feature)))
+        max_len = max(var_feature_length)
+        var_feature = pad_sequences(var_feature, maxlen=max_len, padding='post', )
+        return key2index, var_feature, max_len
+
+    def get_test_var_feature(self, data, col, key2index, max_len):
+        print("user_hist_list: \n")
+
+        def split(x):
+            key_ans = x.split('|')
+            for key in key_ans:
+                if key not in key2index:
+                    # Notice : input value 0 is a special "padding",
+                    # so we do not use 0 to encode valid feature for sequence input
+                    key2index[key] = len(key2index) + 1
+            return list(map(lambda x: key2index[x], key_ans))
+
+        test_hist = list(map(split, data[col].values))
+        test_hist = pad_sequences(test_hist, maxlen=max_len, padding='post')
+        return test_hist
+
+
+class taobaoDataProcess():
+    def __init__(self, log, profile_path, ad_path, user_path, embedding_dim):
+        self.log = log
+        data = self.data_process(profile_path, ad_path, user_path)
+        data = self.get_user_feature(data)
+
+    def optimiz_memory_profile(self, raw_data):
+        optimized_gl = raw_data.copy()
+
+        gl_int = raw_data.select_dtypes(include=['int'])
+        converted_int = gl_int.apply(pd.to_numeric, downcast='unsigned')
+        optimized_gl[converted_int.columns] = converted_int
+
+        gl_obj = raw_data.select_dtypes(include=['object']).copy()
+        converted_obj = pd.DataFrame()
+        for col in gl_obj.columns:
+            num_unique_values = len(gl_obj[col].unique())
+            num_total_values = len(gl_obj[col])
+            if num_unique_values / num_total_values < 0.5:
+                converted_obj.loc[:, col] = gl_obj[col].astype('category')
+            else:
+                converted_obj.loc[:, col] = gl_obj[col]
+        optimized_gl[converted_obj.columns] = converted_obj
+        return optimized_gl
+
+    def optimiz_memory(self, raw_data):
+        optimized_g2 = raw_data.copy()
+
+        g2_int = raw_data.select_dtypes(include=['int'])
+        converted_int = g2_int.apply(pd.to_numeric, downcast='unsigned')
+        optimized_g2[converted_int.columns] = converted_int
+
+        g2_float = raw_data.select_dtypes(include=['float'])
+        converted_float = g2_float.apply(pd.to_numeric, downcast='float')
+        optimized_g2[converted_float.columns] = converted_float
+        return optimized_g2
+
+    def data_process(self, profile_path, ad_path, user_path):
+        profile_data = pd.read_csv(profile_path)
+        ad_data = pd.read_csv(ad_path)
+        user_data = pd.read_csv(user_path)
+        profile_data = self.optimiz_memory_profile(profile_data)
+        ad_data = self.optimiz_memory(ad_data)
+        user_data = self.optimiz_memory(user_data)
+        profile_data.rename(columns={'user': 'userid'}, inplace=True)
+        user_data.rename(columns={'new_user_class_level ': 'new_user_class_level'}, inplace=True)
+        df1 = profile_data.merge(user_data, on="userid")
+        data = df1.merge(ad_data, on="adgroup_id")
+        data['brand'] = data['brand'].fillna('-1', ).astype('int32')
+        # data['age_level'] = data['age_level'].fillna('-1', )
+        # data['cms_segid'] = data['cms_segid'].fillna('-1', )
+        # data['cms_group_id'] = data['cms_group_id'].fillna('-1', )
+        # data['final_gender_code'] = data['final_gender_code'].fillna('-1', )
+        data['pvalue_level'] = data['pvalue_level'].fillna('-1', ).astype('int32')
+        # data['shopping_level'] = data['shopping_level'].fillna('-1', )
+        # data['occupation'] = data['occupation'].fillna('-1', )
+        data['new_user_class_level'] = data['new_user_class_level'].fillna('-1', ).astype('int32')
+        data = data.sort_values(by='time_stamp', ascending=True)
+        return data
+
+    def get_user_feature(self, data):
+        data_group = data[data['clk'] == 1]
+        data_group = data_group[['userid', 'adgroup_id']].groupby('userid').agg(list).reset_index()
+        data_group['user_hist'] = data_group['adgroup_id'].apply(lambda x: '|'.join([str(i) for i in x]))
+        data = pd.merge(data_group.drop('adgroup_id', axis=1), data, on='userid')
+        data_group = data[['userid', 'clk']].groupby('userid').agg('mean').reset_index()
+        #     data_group.rename(columns={'overall': 'user_mean_rating'}, inplace=True)
+        data = pd.merge(data_group, data, on='userid')
         return data
 
     def get_var_feature(self, data, col):
