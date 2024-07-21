@@ -257,10 +257,49 @@ class amazonDataProcess():
 
 
 class taobaoDataProcess():
-    def __init__(self, log, profile_path, ad_path, user_path, embedding_dim):
-        self.log = log
+    def __init__(self, profile_path, ad_path, user_path, embedding_dim):
+        # self.log = log
         data = self.data_process(profile_path, ad_path, user_path)
         data = self.get_user_feature(data)
+
+        sparse_features = ['userid', 'adgroup_id', 'pid', 'cms_segid', 'cms_group_id',
+                           'final_gender_code', 'shopping_level', 'occupation', 'cate_id', 'campaign_id',
+                           'customer', 'age_level', 'brand', 'pvalue_level', 'new_user_class_level']
+
+        dense_features = ['price']
+
+        user_sparse_features, user_dense_features = ['userid', 'cms_segid', 'cms_group_id', 'final_gender_code',
+                                                     'age_level', 'pvalue_level', 'shopping_level', 'occupation',
+                                                     'new_user_class_level', ], []
+        item_sparse_features, item_dense_features = ['adgroup_id', 'cate_id', 'campaign_id', 'customer',
+                                                     'brand', 'pid'], ['price']
+        self.target = ['clk_y']
+
+        # 1.Label Encoding for sparse features,and process sequence features
+        for feat in sparse_features:
+            lbe = LabelEncoder()
+            lbe.fit(data[feat])
+            data[feat] = lbe.transform(data[feat])
+        mms = MinMaxScaler(feature_range=(0, 1))
+        mms.fit(data[dense_features])
+        data[dense_features] = mms.transform(data[dense_features])
+
+        self.train, self.test = train_test_split(data, test_size=0.2)
+
+        # 2.preprocess the sequence feature
+        # genres_key2index, train_genres_list, genres_maxlen = get_var_feature(train, 'genres')
+        user_key2index, train_user_hist, user_maxlen = self.get_var_feature(self.train, 'user_hist')
+        self.user_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                for i, feat in enumerate(user_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
+                                                                                   user_dense_features]
+        self.item_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
+                                                                                   item_dense_features]
+
+        self.train_model_input = {name: self.train[name] for name in sparse_features + dense_features}
+
+        self.test_model_input = {name: self.test[name] for name in sparse_features + dense_features}
+
 
     def optimiz_memory_profile(self, raw_data):
         optimized_gl = raw_data.copy()
