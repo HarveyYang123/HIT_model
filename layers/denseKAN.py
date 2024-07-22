@@ -6,6 +6,7 @@ class DenseKAN(nn.Module):
     def __init__(self, units: int, use_bias: bool = True, grid_size: int = 5, spline_order: int = 3,
                  grid_range=(-1.0, 1.0),
                  spline_initialize_stddev: float = 0.1,
+                 device='cpu',
                  kan_name="kan"):
         super(DenseKAN, self).__init__()
         self.units = units
@@ -13,6 +14,7 @@ class DenseKAN(nn.Module):
         self.spline_order = spline_order
         self.grid_range = grid_range
         self.use_bias = use_bias
+        self.device = device
         self.kan_name = kan_name
 
         # initialize parameters
@@ -24,7 +26,7 @@ class DenseKAN(nn.Module):
         # calculate the B-spline output
         spline_in = self.calc_spline_values(inputs, self.grid, self.spline_order)  # (B, in_size, grid_basis_size)
         # matrix multiply: (batch, in_size, grid_basis_size) @ (in_size, grid_basis_size, out_size) -> (batch, in_size, out_size)
-        spline_out = torch.einsum("bik,iko->bio", spline_in, self.spline_kernel)
+        spline_out = torch.einsum("bik,iko->bio", spline_in.to(self.device), self.spline_kernel.to(self.device))
         return spline_out
 
     def calc_spline_values(self, x: torch.Tensor, grid: torch.Tensor, spline_order: int):
@@ -39,15 +41,10 @@ class DenseKAN(nn.Module):
 
         # iter to calculate the B-spline values
         for k in range(1, spline_order + 1):
-            bases = (
-                            (x - grid[:, : -(k + 1)]) / (grid[:, k:-1] - grid[:, : -(k + 1)])
-                            * bases[:, :, :-1]
-                    ) + (
-                            (grid[:, k + 1:] - x) / (grid[:, k + 1:] - grid[:, 1:(-k)])
-                            * bases[:, :, 1:]
-                    )
+            bases = ((x - grid[:, : -(k + 1)]) / (grid[:, k:-1] - grid[:, : -(k + 1)]) * bases[:, :, :-1]) \
+                    + ((grid[:, k + 1:] - x) / (grid[:, k + 1:] - grid[:, 1:(-k)]) * bases[:, :, 1:])
 
-        return bases
+        return bases.to(self.device)
 
     def build(self):
         in_size = self.units
@@ -68,7 +65,7 @@ class DenseKAN(nn.Module):
         self.grid = nn.Parameter(
             data=grid.float(),
             requires_grad=False
-        )
+        ).to(self.device)
 
         # the linear weights of the spline activation
         self.spline_kernel = nn.Parameter(
@@ -77,14 +74,13 @@ class DenseKAN(nn.Module):
 
         # build scaler weights C
         self.scale_factor = nn.Parameter(
-            data=torch.randn(self.in_size, self.units) * self.spline_initialize_stddev
-        )
+            data=torch.randn(self.in_size, self.units) * self.spline_initialize_stddev).to(self.device)
 
         # build bias
         if self.use_bias:
             self.bias = nn.Parameter(
                 data=torch.zeros(self.units)
-            )
+            ).to(self.device)
         else:
             self.bias = None
 
@@ -105,6 +101,7 @@ class DenseKAN(nn.Module):
 
     def forward(self, inputs):
         # check the inputs, and reshape inputs into 2D tensor (-1, in_size)
+        inputs = inputs.to(self.device)
         inputs, orig_shape = self._check_and_reshape_inputs(inputs)
         output_shape = torch.cat([torch.tensor(orig_shape), torch.tensor([self.units])], dim=0)
 
