@@ -15,11 +15,11 @@ from model.dat import DAT
 from model.cold import Cold
 from model.autoint import AutoInt
 from model.wdm import WideDeep
-from model.TimTower import TimTower
+from model.tim import TimTower
 
-from utils.callbacks import EarlyStopping, ModelCheckpoint
-from utils.logging import Logger
-from utils.dataProcess import amazonDataProcess, setup_seed
+from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
+from preprocessing.logging import Logger
+from preprocessing.dataProcess import amazonDataProcess, setup_seed
 
 
 def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,

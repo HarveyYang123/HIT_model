@@ -17,9 +17,9 @@ from model.autoint import AutoInt
 from model.wdm import WideDeep
 from model.tim import TimTower
 
-from utils.callbacks import EarlyStopping, ModelCheckpoint
-from utils.logging import Logger
-from utils.dataProcess import movieDataProcess, setup_seed
+from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
+from preprocessing.logging import Logger
+from preprocessing.dataProcess import movieDataProcess, setup_seed
 
 
 def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
@@ -139,7 +139,7 @@ def main(args, log):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
-    parser.add_argument("--model_name", type=str, default="tim")
+    parser.add_argument("--model_name", type=str, default="int_tower")
     parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)

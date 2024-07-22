@@ -8,13 +8,12 @@ from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import log_loss, roc_auc_score
 
 from model.IntTower import IntTower
-from utils.callbacks import EarlyStopping, ModelCheckpoint
-from utils.dataProcess import taobaoDataProcess, setup_seed
+from preprocessing.logging import Logger
+from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
+from preprocessing.dataProcess import taobaoDataProcess, setup_seed
 
 
 if __name__ == "__main__":
-    # %%
-
     embedding_dim = 32
     epoch = 15
     batch_size = 2048
@@ -26,11 +25,11 @@ if __name__ == "__main__":
 
     setup_seed(seed)
 
-    profile_path = './data/Alibaba/raw_sample.csv'
-    ad_path = './data/Alibaba/ad_feature.csv'
-    user_path = './data/Alibaba/user_profile.csv'
-
-    data = taobaoDataProcess(profile_path, ad_path, user_path, embedding_dim)
+    profile_path = '/data/workPlace/recall_model/data/Alibaba/raw_sample.csv'
+    ad_path = '/data/workPlace/recall_model/data/Alibaba/ad_feature.csv'
+    user_path = '/data/workPlace/recall_model/data/Alibaba/user_profile.csv'
+    log = Logger('./log/movielens_models.log', level='debug')
+    data = taobaoDataProcess(log, profile_path, ad_path, user_path, embedding_dim)
 
     # %%
     # 4.Define Model,train,predict and evaluate
