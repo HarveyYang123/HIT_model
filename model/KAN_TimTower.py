@@ -128,7 +128,7 @@ class KanTimTower(DualTower):
                                use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
 
             user_dnn_embedding = user_dnn(user_dnn_input)
-            user_kan = DenseKAN(32, grid_size=5, kan_name="user_kan")
+            user_kan = DenseKAN(32, grid_size=5, device = self.device, kan_name="user_kan")
             self.user_dnn_embedding = user_kan(user_dnn_embedding)
 
         # item towel
@@ -159,11 +159,11 @@ class KanTimTower(DualTower):
                 self.item_dnn_embedding = None
 
             item_dnn_embedding = self.item_dnn(item_dnn_input)
-            item_kan = DenseKAN(32, grid_size=5, kan_name="item_kan")
+            item_kan = DenseKAN(32, grid_size=5, device = self.device, kan_name="item_kan")
             self.item_dnn_embedding = item_kan(item_dnn_embedding)
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
-            score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
+            score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma).to(self.device)
             output = self.out(score)
             return output, self.user_dnn_embedding, self.item_dnn_embedding, \
                 target_recon_output_for_user, non_target_recon_output_for_user, \
