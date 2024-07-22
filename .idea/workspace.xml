@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8c69466b-ebf7-4cbf-bb67-2cceb8c3f230" name="Changes" comment="" />
+    <list default="true" id="8c69466b-ebf7-4cbf-bb67-2cceb8c3f230" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_movielens_whole_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_movielens_whole_models.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,7 +99,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/main" />
+                        <option value="origin/dev_tim_model" />
                       </list>
                     </value>
                   </entry>
@@ -113,7 +116,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/model/tim.py</url>
-          <line>106</line>
+          <line>109</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
