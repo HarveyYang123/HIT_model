@@ -115,7 +115,7 @@ class DNN(nn.Module):
     def forward(self, inputs):
         deep_input = inputs
         for i in range(len(self.linears)):
-            print(f"i:{i}, deep_input size:{deep_input.size()}")
+            # print(f"i:{i}, deep_input size:{deep_input.size()}")
             fc = self.linears[i](deep_input)
 
             if self.use_bn:
