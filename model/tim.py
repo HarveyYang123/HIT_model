@@ -52,25 +52,6 @@ class TimTower(DualTower):
         self.hidden_units_for_recon = hidden_units_for_recon
         self.activation_for_recon = activation_for_recon
 
-        # self.linears_target_recon_for_user = nn.ModuleList(
-        #     [nn.Linear(hidden_units_for_recon[i], hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        # self.activation_layers_target_recon_for_user = nn.ModuleList(
-        #     [activation_layer(activation_for_recon, hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        # self.linears_non_target_recon_for_user = nn.ModuleList(
-        #     [nn.Linear(hidden_units_for_recon[i], hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        # self.activation_layers_non_target_recon_for_user = nn.ModuleList(
-        #     [activation_layer(activation_for_recon, hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-
-        # implicit interaction network for item
-        self.linears_target_recon_for_item = nn.ModuleList(
-            [nn.Linear(hidden_units_for_recon[i], hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        self.activation_layers_target_recon_for_item = nn.ModuleList(
-            [activation_layer(activation_for_recon, hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        self.linears_non_target_recon_for_item = nn.ModuleList(
-            [nn.Linear(hidden_units_for_recon[i], hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-        self.activation_layers_non_target_recon_for_item = nn.ModuleList(
-            [activation_layer(activation_for_recon, hidden_units_for_recon[i+1]) for i in range(len(hidden_units_for_recon) - 1)])
-
         # self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
         # self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
 
@@ -90,10 +71,10 @@ class TimTower(DualTower):
                 activation_layer(self.activation_for_recon, self.hidden_units_for_recon[i + 1]))
 
         for i in range(len(linears_recon)):
-            if target:
-                print(f"i:{i}, targe_recon_input size:{fc.size()}")
-            else:
-                print(f"i:{i}, non_targe_recon_input size:{fc.size()}")
+            # if target:
+            #     print(f"i:{i}, targe_recon_input size:{fc.size()}")
+            # else:
+            #     print(f"i:{i}, non_targe_recon_input size:{fc.size()}")
             fc = linears_recon[i](fc)
             if i != len(linears_recon) - 1:
                 fc = activation_layers_recon[i](fc)
@@ -126,7 +107,7 @@ class TimTower(DualTower):
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
 
             if len(self.user_dnn_feature_columns) > 0:
-                print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
+                # print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
                 user_dnn = DNN(user_dnn_input.size()[-1], self.dnn_hidden_units, activation=self.dnn_activation,
                                l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
                                use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)

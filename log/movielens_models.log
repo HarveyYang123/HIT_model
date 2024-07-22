@@ -54,3 +54,13 @@
 2024-07-20 22:07:53,162 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:132] - INFO: model_name = tim; evaluate:{'auc': 0.23401360544217686, 'accuracy': 0.9074074074074074, 'logloss': 0.630842574973314}
 2024-07-20 22:07:53,178 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:136] - INFO: model_name = tim; test LogLoss, 0.6168
 2024-07-20 22:07:53,180 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:137] - INFO: model_name = tim; test AUC, 0.7311
+2024-07-21 11:47:26,022 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:91] - INFO: 文件夹'./checkpoints'已存在。
+2024-07-21 11:47:26,078 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:59] - INFO: model_name tim
+2024-07-21 11:47:28,123 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:132] - INFO: model_name = tim; evaluate:{'auc': 0.4140589569160998, 'accuracy': 0.9074074074074074, 'logloss': 0.613601717263785}
+2024-07-21 11:47:28,140 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:136] - INFO: model_name = tim; test LogLoss, 0.6357
+2024-07-21 11:47:28,142 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:137] - INFO: model_name = tim; test AUC, 0.5568
+2024-07-21 11:50:25,950 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:91] - INFO: 文件夹'./checkpoints'已存在。
+2024-07-21 11:50:26,029 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:59] - INFO: model_name tim
+2024-07-21 11:50:28,105 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:132] - INFO: model_name = tim; evaluate:{'auc': 0.4140589569160998, 'accuracy': 0.9074074074074074, 'logloss': 0.613601717263785}
+2024-07-21 11:50:28,119 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:136] - INFO: model_name = tim; test LogLoss, 0.6357
+2024-07-21 11:50:28,121 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:137] - INFO: model_name = tim; test AUC, 0.5568
