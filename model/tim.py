@@ -70,14 +70,17 @@ class TimTower(DualTower):
             activation_layers_recon.append(
                 activation_layer(self.activation_for_recon, self.hidden_units_for_recon[i + 1]))
 
+        fc.to(self.device)
         for i in range(len(linears_recon)):
             # if target:
             #     print(f"i:{i}, targe_recon_input size:{fc.size()}")
             # else:
             #     print(f"i:{i}, non_targe_recon_input size:{fc.size()}")
+            linears_recon[i] = linears_recon[i].to(self.device)
             fc = linears_recon[i](fc)
             if i != len(linears_recon) - 1:
                 fc = activation_layers_recon[i](fc)
+                
         recon_output = fc
         return recon_output
 

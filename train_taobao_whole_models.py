@@ -16,6 +16,7 @@ from model.cold import Cold
 from model.autoint import AutoInt
 from model.wdm import WideDeep
 from model.tim import TimTower
+from model.KAN_TimTower import KanTimTower
 
 from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
 from preprocessing.logging import Logger
@@ -58,6 +59,10 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
     elif model_name == "tim":
         log.logger.info("model_name tim")
         model = TimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
+                    device=device)
+    elif model_name == "kan_Tim":
+        log.logger.info("model_name kan_Tim")
+        model = KanTimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
                     device=device)
     else:
         log.logger.info("model_name wide_and_deep")
@@ -109,6 +114,7 @@ def main(args, log):
 
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
                 dropout, device)
+    
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
     model.fit(taobaoData.train_model_input, taobaoData.train[taobaoData.target].values, batch_size=batch_size,
@@ -132,7 +138,7 @@ def main(args, log):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kan_Tim"]
     parser.add_argument("--model_name", type=str, default="tim")
     # parser.add_argument("--profile_path", type=str, default="/data/workPlace/recall_model/data/Alibaba/raw_sample.csv")
     # parser.add_argument("--ad_path", type=str, default="/data/workPlace/recall_model/data/Alibaba/ad_feature.csv")
