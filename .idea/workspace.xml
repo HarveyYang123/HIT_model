@@ -5,23 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8c69466b-ebf7-4cbf-bb67-2cceb8c3f230" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/data/Alibaba/ad_feature.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/Alibaba/behavior_log_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/Alibaba/raw_sample_test.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/Alibaba/user_profile.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/train_taobao_whole_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/dat.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/dat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_amazon_inttower.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_amazon_whole_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_amazon_whole_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_movielens_deepfm.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_movielens_dssm.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/train_movielens_whole_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_movielens_whole_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_taobao_IntTower.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_taobao_IntTower.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/callbacks.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/dataProcess.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/dataProcess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/logging.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,21 +27,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "inlay.hints",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="train_movielens_whole_models" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TIM_model" />
@@ -96,7 +81,7 @@
       <updated>1721355462567</updated>
       <workItem from="1721355463979" duration="752000" />
       <workItem from="1721391990081" duration="1543000" />
-      <workItem from="1721393900083" duration="21310000" />
+      <workItem from="1721393900083" duration="21934000" />
     </task>
     <servers />
   </component>
