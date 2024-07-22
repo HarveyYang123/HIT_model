@@ -72,7 +72,7 @@ def contrast_loss(y, user_embedding, item_embedding):
     exp_scores = scores.exp()
 
     # Compute the loss
-    loss = torch.log(exp_scores.sum(dim=1)) - scores[range(scores.shape[0]), y]
+    loss = torch.log(exp_scores.sum(dim=1)) - scores[torch.arange(scores.shape[0]), y.to(torch.int64)]
     loss = loss.mean()
 
     return loss
@@ -96,8 +96,6 @@ def contrast_loss(y, user_embedding, item_embedding):
 #     pos += torch.mean(user_embedding * item_embedding * pos_index) / tau
 
 #     all += torch.mean(user_embedding * item_embedding) / tau
-
-
 
 #     contras = -torch.log(torch.exp(pos) / torch.exp(all))
 #     # print(contras)

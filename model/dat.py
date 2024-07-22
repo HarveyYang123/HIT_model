@@ -73,7 +73,7 @@ class DAT(DualTower):
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
 
             if len(self.user_dnn_feature_columns) > 0:
-                print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
+                # print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
                 self.user_dnn = DNN(user_dnn_input.size()[-1], self.dnn_hidden_units, activation=self.dnn_activation,
                                     l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
                                     use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
