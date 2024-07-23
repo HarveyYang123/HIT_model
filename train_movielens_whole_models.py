@@ -79,7 +79,7 @@ def main(args, log):
     lr = args.lr
     dropout = args.dropout
 
-    setup_seed(seed=1023)
+    setup_seed(seed=args.random_seed)
 
     ckpt_path = '{}/{}.ckpt'.format(ckpt_fold, model_name)
     # 检查文件夹是否存在
@@ -140,13 +140,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
     parser.add_argument("--model_name", type=str, default="int_tower")
-    parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
+    parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
+    parser.add_argument("--random_seed", type=int, default=1023)
     opt = parser.parse_args()
     log = Logger('./log/movielens_models.log', level='debug')
     main(opt, log)
