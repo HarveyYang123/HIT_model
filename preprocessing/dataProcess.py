@@ -76,6 +76,12 @@ class movieDataProcess():
         self.user_feature_columns = user_feature_columns + user_varlen_feature_columns
         self.item_feature_columns = item_feature_columns + item_varlen_feature_columns
 
+        self.user_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                for i, feat in enumerate(user_sparse_features)] + user_varlen_feature_columns
+        self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                for i, feat in enumerate(item_sparse_features)] + item_varlen_feature_columns
+
+
         # add user history as user_varlen_feature_columns
         self.train_model_input = {name: train[name] for name in self.sparse_features + self.dense_features}
         self.train_model_input["genres"] = train_genres_list

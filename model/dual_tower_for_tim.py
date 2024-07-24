@@ -17,13 +17,13 @@ from preprocessing.utils import slice_arrays
 from tensorflow.python.keras.callbacks import CallbackList
 from preprocessing.callbacks import History
 from preprocessing.utils import contrast_loss
-from preprocessing.utils import dual_augmented_loss
+from preprocessing.utils import generation_loss
 
 
-class DualTower(nn.Module):
+class DualTowerForTim(nn.Module):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, l2_reg_embedding=1e-5,
                  init_std=0.0001, seed=1024, task='binary', device='cpu', gpus=None):
-        super(DualTower, self).__init__()
+        super(DualTowerForTim, self).__init__()
         torch.manual_seed(seed)
 
         self.reg_loss = torch.zeros((1,), device=device)
@@ -143,7 +143,9 @@ class DualTower(nn.Module):
             start_time = time.time()
             loss_epoch = 0
             total_loss_epoch, predict_loss_epoch, reg_loss_epoch, aux_loss_epoch = 0, 0, 0, 0
-            user_augment_loss_epoch, item_augment_loss_epoch = 0, 0
+            target_generator_for_user_loss_epoch, target_generator_for_item_loss_epoch = 0, 0
+            non_target_generator_for_user_loss_epoch, non_target_generator_for_item_loss_epoch = 0, 0
+
             train_result = {}
 
             with tqdm(enumerate(train_loader), disable=verbose != 1) as t:
@@ -155,13 +157,18 @@ class DualTower(nn.Module):
 
                     out = model(x)
                     # print(out)
-                    y_pred,user_embedding,item_embedding,user_augment_vector,item_augment_vector\
-                        = out[0],out[1],out[2],out[3],out[4]
+                    y_pred,user_embedding,item_embedding,\
+                        target_recon_output_for_user, non_target_recon_output_for_user,\
+                        target_recon_output_for_item, non_target_recon_output_for_item \
+                        = out[0],out[1],out[2],out[3],out[4],out[5],out[6]
 
 
-                    loss_v,loss_u = dual_augmented_loss(y_au,user_embedding,
-                                                        item_embedding,user_augment_vector,item_augment_vector)
-
+                    loss_v_tar,loss_u_tar = generation_loss(y_au,user_embedding,item_embedding,
+                                                    target_recon_output_for_user, target_recon_output_for_item,
+                                                    target=True)
+                    loss_v_non_tar,loss_u_non_tar = generation_loss(y_au,user_embedding,item_embedding,
+                                                    non_target_recon_output_for_user, non_target_recon_output_for_item,
+                                                    target=False)
 
                     y_pred = y_pred.squeeze()
 
@@ -171,7 +178,7 @@ class DualTower(nn.Module):
                     reg_loss = self.get_regularization_loss()
 
                     # total_loss = loss + reg_loss + self.aux_loss + contras
-                    total_loss = loss + reg_loss + self.aux_loss + loss_v + loss_u
+                    total_loss = loss + reg_loss + self.aux_loss + loss_v_tar + loss_u_tar + loss_v_non_tar + loss_u_non_tar
                     # print(total_loss, contras, loss)
 
                     loss_epoch += loss.item()
@@ -179,8 +186,10 @@ class DualTower(nn.Module):
                     predict_loss_epoch += loss.item()
                     reg_loss_epoch += reg_loss.item()
                     aux_loss_epoch += self.aux_loss.item()
-                    user_augment_loss_epoch += loss_v.item()
-                    item_augment_loss_epoch += loss_u.item()
+                    target_generator_for_user_loss_epoch += loss_v_tar.item()
+                    target_generator_for_item_loss_epoch += loss_u_tar.item()
+                    non_target_generator_for_user_loss_epoch += loss_v_non_tar.item()
+                    non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
 
                     total_loss.backward()
                     optim.step()
@@ -198,8 +207,11 @@ class DualTower(nn.Module):
             epoch_logs["predict_loss"] = predict_loss_epoch / sample_num
             epoch_logs["reg_loss"] = reg_loss_epoch / sample_num
             epoch_logs["aux_loss"] = aux_loss_epoch / sample_num
-            epoch_logs["user_augment_loss"] = user_augment_loss_epoch / sample_num
-            epoch_logs["item_augment_loss"] = item_augment_loss_epoch / sample_num
+            epoch_logs["target_generator_for_user_loss"] = target_generator_for_user_loss_epoch / sample_num
+            epoch_logs["target_generator_for_item_loss"] = target_generator_for_item_loss_epoch / sample_num
+            epoch_logs["non_target_generator_for_user_loss"] = non_target_generator_for_user_loss_epoch / sample_num
+            epoch_logs["non_target_generator_for_item_loss"] = non_target_generator_for_item_loss_epoch / sample_num
+
 
             for name, result in train_result.items():
                 epoch_logs[name] = np.sum(result) / steps_per_epoch
@@ -217,9 +229,10 @@ class DualTower(nn.Module):
                 eval_str += " - predict_loss: {0: .4f}".format(epoch_logs["predict_loss"])
                 eval_str += " - reg_loss: {0: .4f}".format(epoch_logs["reg_loss"])
                 eval_str += " - aux_loss: {0: .4f}".format(epoch_logs["aux_loss"])
-                eval_str += " - user_augment_loss: {0: .8f}".format(epoch_logs["user_augment_loss"])
-                eval_str += " - item_augment_loss: {0: .8f}".format(epoch_logs["item_augment_loss"])
-
+                eval_str += " - target_generator_for_user_loss: {0: .8f}".format(epoch_logs["target_generator_for_user_loss"])
+                eval_str += " - target_generator_for_item_loss: {0: .8f}".format(epoch_logs["target_generator_for_item_loss"])
+                eval_str += " - non_target_generator_for_user_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_user_loss"])
+                eval_str += " - non_target_generator_for_item_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_item_loss"])
 
                 for name in self.metrics:
                     eval_str += " - " + name + ": {0: .4f} ".format(epoch_logs[name]) + " - " + \

@@ -19,22 +19,36 @@ class DAT(DualTower):
     """https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_4.pdf"""
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
                  dnn_hidden_units=(300, 300, 32), dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
-                 dnn_dropout = 0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None):
+                 dnn_dropout = 0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None,
+                 user_aug_vector_dim=32, item_aug_vector_dim=32):
         super(DAT, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                     l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                     device=device, gpus=gpus)
 
+        self.user_aug_vector_dim = user_aug_vector_dim
+        self.item_aug_vector_dim = item_aug_vector_dim
+        if len(user_dnn_feature_columns) > 0:
+            self.user_dnn = DNN(compute_input_dim(user_dnn_feature_columns)+self.user_aug_vector_dim, dnn_hidden_units,
+                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                use_bn=dnn_use_bn, init_std=init_std, device=device)
+            self.user_dnn_embedding = None
+
+        if len(item_dnn_feature_columns) > 0:
+            self.item_dnn = DNN(compute_input_dim(item_dnn_feature_columns)+self.item_aug_vector_dim, dnn_hidden_units,
+                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                use_bn=dnn_use_bn, init_std=init_std, device=device)
+            self.item_dnn_embedding = None
 
 
-        self.item_dnn_feature_columns = item_dnn_feature_columns
-
-        self.user_dnn_feature_columns = user_dnn_feature_columns
-        self.dnn_hidden_units = dnn_hidden_units
-        self.dnn_activation = dnn_activation
-        self.l2_reg_dnn = l2_reg_dnn
-        self.dnn_dropout = dnn_dropout
-        self.dnn_use_bn = dnn_use_bn
-        self.init_std = init_std
+        # self.item_dnn_feature_columns = item_dnn_feature_columns
+        #
+        # self.user_dnn_feature_columns = user_dnn_feature_columns
+        # self.dnn_hidden_units = dnn_hidden_units
+        # self.dnn_activation = dnn_activation
+        # self.l2_reg_dnn = l2_reg_dnn
+        # self.dnn_dropout = dnn_dropout
+        # self.dnn_use_bn = dnn_use_bn
+        # self.init_std = init_std
         self.gamma = gamma
         self.l2_reg_embedding = l2_reg_embedding
         self.seed = seed
@@ -50,12 +64,9 @@ class DAT(DualTower):
         self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
         self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
 
-        # self.dense = torch.nn.Linear(128*len(self.user_dnn_feature_columns),1).cuda()
-        #
-        # self.user_col_dense = torch.nn.Linear(128, 128*len(self.user_dnn_feature_columns)).cuda()
-        # self.item_col_dense = torch.nn.Linear(128, 128*len(self.item_dnn_feature_columns)).cuda()
 
     def forward(self, inputs):
+        # user tower
         if len(self.user_dnn_feature_columns) > 0:
             user_sparse_embedding_list, user_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.user_dnn_feature_columns, self.user_embedding_dict)
@@ -67,17 +78,12 @@ class DAT(DualTower):
             else:
                 self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape)
 
+            # ensure the input dimension of DNN is initialized correctly
+            assert self.user_aug_vector.shape[-1] == self.user_aug_vector_dim
 
             user_sparse_embedding_list.append(self.user_aug_vector)
 
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
-
-            if len(self.user_dnn_feature_columns) > 0:
-                # print(f"len(user_dnn_feature_columns):{len(self.user_dnn_feature_columns)}")
-                self.user_dnn = DNN(user_dnn_input.size()[-1], self.dnn_hidden_units, activation=self.dnn_activation,
-                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
-                self.user_dnn_embedding = None
 
             self.user_dnn_embedding = self.user_dnn(user_dnn_input)
 
@@ -99,6 +105,7 @@ class DAT(DualTower):
             # self.user_dnn_embedding = self.user_col_dense(self.user_dnn_embedding)
             # self.user_dnn_embedding = self.dense(self.user_dnn_embedding)
 
+        # item tower
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
@@ -108,15 +115,12 @@ class DAT(DualTower):
             else:
                 self.item_aug_vector = torch.rand(item_sparse_embedding_list[-1].shape)
 
+            # ensure the input dimension of DNN is initialized correctly
+            assert self.item_aug_vector.shape[-1] == self.item_aug_vector_dim
+
             item_sparse_embedding_list.append(self.item_aug_vector)
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # print(item_dnn_input.shape)
-
-            if len(self.item_dnn_feature_columns) > 0:
-                self.item_dnn = DNN(item_dnn_input.size()[-1], self.dnn_hidden_units,
-                                    activation=self.dnn_activation, l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
-                self.item_dnn_embedding = None
 
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
 

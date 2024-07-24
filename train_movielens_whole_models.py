@@ -23,7 +23,8 @@ from preprocessing.dataProcess import movieDataProcess, setup_seed
 
 
 def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
-                dnn_feature_columns, dropout, device):
+                dnn_feature_columns, dropout, device,
+                user_feature_columns_for_recon=None, item_feature_columns_for_recon=None):
     if model_name == "int_tower":
         log.logger.info("model_name int_tower")
         model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
@@ -57,8 +58,10 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                          device=device)
     elif model_name == "tim":
         log.logger.info("model_name tim")
-        model = TimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
+        model = TimTower(user_feature_columns, item_feature_columns,
+                         user_input_for_recon=user_feature_columns_for_recon,
+                         item_input_for_recon=item_feature_columns_for_recon,
+                         task='binary', dnn_dropout=dropout, device=device)
     else:
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
@@ -109,9 +112,11 @@ def main(args, log):
     user_feature_columns = movieData.user_feature_columns
     item_feature_columns = movieData.item_feature_columns
     dnn_feature_columns = linear_feature_columns
+    user_feature_columns_for_recon = movieData.user_feature_columns_for_recon
+    item_feature_columns_for_recon = movieData.item_feature_columns_for_recon
 
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
-                dropout, device)
+                dropout, device, user_feature_columns_for_recon, item_feature_columns_for_recon)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss']
                   , lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
@@ -139,8 +144,8 @@ def main(args, log):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
-    parser.add_argument("--model_name", type=str, default="dat")
-    parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
+    parser.add_argument("--model_name", type=str, default="tim")
+    parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=10)

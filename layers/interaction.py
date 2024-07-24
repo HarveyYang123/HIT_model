@@ -52,7 +52,9 @@ class ImplicitInteraction(nn.Module):
         self.to(device)
 
     def forward(self, inputs):
-        deep_input = inputs
+        # stop gradient
+        deep_input = inputs.detach()
+
         for i in range(len(self.linears)):
             fc = self.linears[i](deep_input)
             if self.use_bn and fc.size()[0] > 1:

@@ -55,6 +55,25 @@ def dual_augmented_loss(y, user_embedding, item_embedding, user_augment_vector, 
 
     return loss_u,loss_v
 
+
+def generation_loss(y, user_embedding, item_embedding, user_generator_vector, item_generator_vector, target=True):
+    # stop gradient
+    user_embedding_new = user_embedding.detach()
+    item_embedding_new = item_embedding.detach()
+
+    user_generator_vector = torch.squeeze(user_generator_vector)
+    item_generator_vector = torch.squeeze(item_generator_vector)
+    if target:
+        # positive samples
+        loss_u = torch.mean(torch.pow(y * user_generator_vector + (1 - y) * item_embedding_new - item_embedding_new, 2))
+        loss_v = torch.mean(torch.pow(y * item_generator_vector + (1 - y) * user_embedding_new - user_embedding_new, 2))
+    else:
+        # negative samples
+        loss_u = torch.mean(torch.pow((1 - y) * user_generator_vector + y * item_embedding_new - item_embedding_new, 2))
+        loss_v = torch.mean(torch.pow((1 - y) * item_generator_vector + y * user_embedding_new - user_embedding_new, 2))
+    return loss_u,loss_v
+
+
 def contrast_loss(y, user_embedding, item_embedding):
     # Normalize the embeddings
     user_embedding = torch.nn.functional.normalize(user_embedding, dim=-1)
