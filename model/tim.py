@@ -62,7 +62,7 @@ class TimTower(DualTower):
         # self.item_col_dense = torch.nn.Linear(128, 128*len(self.item_dnn_feature_columns)).cuda()
 
     def forward(self, inputs):
-        # user towel
+        # user tower
         if len(self.user_dnn_feature_columns) > 0:
             user_sparse_embedding_list, user_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.user_dnn_feature_columns, self.user_embedding_dict)
@@ -77,19 +77,13 @@ class TimTower(DualTower):
 
             # implicit interaction user start
             target_recon_user_fc = combined_dnn_input(sparse_embedding_list=user_sparse_embedding_list, dense_value_list=[])
-            target_recon_user = ImplicitInteraction(target_recon_user_fc.size()[-1], self.hidden_units_for_recon,
-                                                    activation=self.activation_for_recon,
-                                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
 
+            target_recon_user = ImplicitInteraction(target_recon_user_fc.size()[-1], self.hidden_units_for_recon,
+                                                    activation=self.activation_for_recon, device=self.device)
             target_recon_output_for_user = target_recon_user(target_recon_user_fc)
 
             non_target_recon_user = ImplicitInteraction(target_recon_user_fc.size()[-1], self.hidden_units_for_recon,
-                                                        activation=self.activation_for_recon,
-                                                        l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                                        use_bn=self.dnn_use_bn, init_std=self.init_std,
-                                                        device=self.device)
-
+                                                        activation=self.activation_for_recon, device=self.device)
             non_target_recon_output_for_user = non_target_recon_user(target_recon_user_fc)
             # implicit interaction user end
 
@@ -106,7 +100,7 @@ class TimTower(DualTower):
 
             self.user_dnn_embedding = user_dnn(user_dnn_input)
 
-        # item towel
+        # item tower
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
@@ -115,18 +109,11 @@ class TimTower(DualTower):
             target_recon_item_fc = combined_dnn_input(sparse_embedding_list=item_sparse_embedding_list,
                                                       dense_value_list=[])
             target_recon_item = ImplicitInteraction(target_recon_item_fc.size()[-1], self.hidden_units_for_recon,
-                                                    activation=self.activation_for_recon,
-                                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
-
+                                                    activation=self.activation_for_recon, device=self.device)
             target_recon_output_for_item = target_recon_item(target_recon_item_fc)
 
             non_target_recon_item = ImplicitInteraction(target_recon_item_fc.size()[-1], self.hidden_units_for_recon,
-                                                        activation=self.activation_for_recon,
-                                                        l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
-                                                        use_bn=self.dnn_use_bn, init_std=self.init_std,
-                                                        device=self.device)
-
+                                                        activation=self.activation_for_recon, device=self.device)
             non_target_recon_output_for_item = non_target_recon_item(target_recon_item_fc)
             # implicit interaction user end
 

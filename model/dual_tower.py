@@ -142,7 +142,8 @@ class DualTower(nn.Module):
             epoch_logs = {}
             start_time = time.time()
             loss_epoch = 0
-            total_loss_epoch = 0
+            total_loss_epoch, predict_loss_epoch, reg_loss_epoch, aux_loss_epoch = 0, 0, 0, 0
+            user_augment_loss_epoch, item_augment_loss_epoch = 0, 0
             train_result = {}
 
             with tqdm(enumerate(train_loader), disable=verbose != 1) as t:
@@ -175,6 +176,12 @@ class DualTower(nn.Module):
 
                     loss_epoch += loss.item()
                     total_loss_epoch += total_loss.item()
+                    predict_loss_epoch += loss.item()
+                    reg_loss_epoch += reg_loss.item()
+                    aux_loss_epoch += self.aux_loss.item()
+                    user_augment_loss_epoch += loss_v.item()
+                    item_augment_loss_epoch += loss_u.item()
+
                     total_loss.backward()
                     optim.step()
 
@@ -187,7 +194,13 @@ class DualTower(nn.Module):
                             ))
 
             # add epoch_logs
-            epoch_logs["loss"] = total_loss_epoch / sample_num
+            epoch_logs["total_loss"] = total_loss_epoch / sample_num
+            epoch_logs["predict_loss"] = predict_loss_epoch / sample_num
+            epoch_logs["reg_loss"] = reg_loss_epoch / sample_num
+            epoch_logs["aux_loss"] = aux_loss_epoch / sample_num
+            epoch_logs["user_augment_loss"] = user_augment_loss_epoch / sample_num
+            epoch_logs["item_augment_loss"] = item_augment_loss_epoch / sample_num
+
             for name, result in train_result.items():
                 epoch_logs[name] = np.sum(result) / steps_per_epoch
 
@@ -200,7 +213,13 @@ class DualTower(nn.Module):
                 epoch_time = int(time.time() - start_time)
                 print('Epoch {0}/{1}'.format(epoch + 1, epochs))
 
-                eval_str = "{0}s - loss: {1: .4f}".format(epoch_time, epoch_logs["loss"])
+                eval_str = "{0}s - loss: {1: .4f}".format(epoch_time, epoch_logs["total_loss"])
+                eval_str += " - predict_loss: {0: .4f}".format(epoch_logs["predict_loss"])
+                eval_str += " - reg_loss: {0: .4f}".format(epoch_logs["reg_loss"])
+                eval_str += " - aux_loss: {0: .4f}".format(epoch_logs["aux_loss"])
+                eval_str += " - user_augment_loss: {0: .4f}".format(epoch_logs["user_augment_loss"])
+                eval_str += " - item_augment_loss: {0: .4f}".format(epoch_logs["item_augment_loss"])
+
 
                 for name in self.metrics:
                     eval_str += " - " + name + ": {0: .4f} ".format(epoch_logs[name]) + " - " + \
