@@ -86,9 +86,9 @@ def main(args, log):
     if not os.path.exists(ckpt_fold):
         # 如果文件夹不存在，则创建文件夹
         os.makedirs(ckpt_fold)
-        log.logger.info(f"文件夹'{ckpt_fold}'已创建。")
+        log.logger.info(f"the fold '{ckpt_fold}' is created now.")
     else:
-        log.logger.info(f"文件夹'{ckpt_fold}'已存在。")
+        log.logger.info(f"the fold '{ckpt_fold}' already exists.")
 
     movieData = movieDataProcess(log, args.data_path, embedding_dim)
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
     parser.add_argument("--model_name", type=str, default="int_tower")
-    parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
+    parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=10)
