@@ -118,7 +118,7 @@ class DNN(nn.Module):
             # print(f"i:{i}, deep_input size:{deep_input.size()}")
             fc = self.linears[i](deep_input)
 
-            if self.use_bn:
+            if self.use_bn and fc.size()[0] > 1:
                 fc = self.bn[i](fc)
 
             fc = self.activation_layers[i](fc)

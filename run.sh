@@ -1,9 +1,11 @@
 #!/bin/bash
+
+#nohup sh run.sh >tmp.log 2>&1 &
 arr=("int_tower" "dssm"  "dat" "deep_fm" "dcn" "cold" "auto_int" "wide_and_deep" "tim" "kan_Tim")
 
 # 定义目录路径
 movielens_path="./log/movielens_shell_log"
-
+rm -rf ./checkpoints/*
 # 检查目录是否存在
 if [ ! -d "$movielens_path" ]; then
   # 如果目录不存在，创建新的目录
@@ -14,8 +16,8 @@ else
 fi
 
 for value in ${arr[@]}; do
-  echo "movielens model_name：$value"
-  python train_movielens_whole_models.py --model_name $value > log/movielens_shell_log/$value.log 2>&1 &
+  echo "python train_movielens_whole_models.py --model_name $value --epoch 1000 > log/movielens_shell_log/$value.log 2>&1 &"
+  python train_movielens_whole_models.py --model_name $value --epoch 1000 > log/movielens_shell_log/$value.log 2>&1 &
   pid1=$!
 
   wait $pid1
@@ -24,7 +26,7 @@ done
 
 # 定义目录路径
 taobao_path="./log/taobao_shell_log"
-
+rm -rf ./checkpoints/*
 # 检查目录是否存在
 if [ ! -d "$taobao_path" ]; then
   # 如果目录不存在，创建新的目录
@@ -35,8 +37,8 @@ else
 fi
 
 for value in ${arr[@]}; do
-  echo "taobao model_name：$value"
-  python trian_taobao_whole_models.py --model_name $value > log/taobao_shell_log/$value.log 2>&1 &
+  echo "python train_taobao_whole_models.py --model_name $value --epoch 1000 > log/taobao_shell_log/$value.log 2>&1 &"
+  python train_taobao_whole_models.py --model_name $value --epoch 1000 > log/taobao_shell_log/$value.log 2>&1 &
   pid1=$!
 
   wait $pid1
@@ -45,7 +47,7 @@ done
 
 # 定义目录路径
 amazon_path="./log/amazon_shell_log"
-
+rm -rf ./checkpoints/*
 # 检查目录是否存在
 if [ ! -d "$amazon_path" ]; then
   # 如果目录不存在，创建新的目录
@@ -56,8 +58,8 @@ else
 fi
 
 for value in ${arr[@]}; do
-  echo "amazon model_name：$value"
-  python trian_amazon_whole_models.py --model_name $value > log/amazon_shell_log/$value.log 2>&1 &
+  echo "python trian_amazon_whole_models.py --model_name $value --epoch 1000 > log/amazon_shell_log/$value.log 2>&1 &"
+  python trian_amazon_whole_models.py --model_name $value --epoch 1000 > log/amazon_shell_log/$value.log 2>&1 &
   pid1=$!
 
   wait $pid1
