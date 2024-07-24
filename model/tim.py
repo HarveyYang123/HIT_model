@@ -13,9 +13,10 @@ from preprocessing.utils import Cosine_Similarity
 from preprocessing.utils import col_score
 from preprocessing.utils import col_score_2
 from preprocessing.utils import single_score
-from layers.interaction import SENETLayer
+from layers.interaction import SENETLayer, ImplicitInteraction
 import torch.nn as nn
 from layers.activation import activation_layer
+
 
 class TimTower(DualTower):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
@@ -60,31 +61,6 @@ class TimTower(DualTower):
         # self.user_col_dense = torch.nn.Linear(128, 128*len(self.user_dnn_feature_columns)).cuda()
         # self.item_col_dense = torch.nn.Linear(128, 128*len(self.item_dnn_feature_columns)).cuda()
 
-    def implicit_interaction(self, sparse_embedding_list, target=True):
-        fc = combined_dnn_input(sparse_embedding_list=sparse_embedding_list, dense_value_list=[])
-        linears_recon = nn.ModuleList([nn.Linear(fc.shape[-1], self.hidden_units_for_recon[0])])
-        activation_layers_recon = nn.ModuleList()
-        for i in range(len(self.hidden_units_for_recon) - 1):
-            linears_recon.append(
-                nn.Linear(self.hidden_units_for_recon[i], self.hidden_units_for_recon[i + 1]))
-            activation_layers_recon.append(
-                activation_layer(self.activation_for_recon, self.hidden_units_for_recon[i + 1]))
-
-        fc.to(self.device)
-        for i in range(len(linears_recon)):
-            # if target:
-            #     print(f"i:{i}, targe_recon_input size:{fc.size()}")
-            # else:
-            #     print(f"i:{i}, non_targe_recon_input size:{fc.size()}")
-            linears_recon[i] = linears_recon[i].to(self.device)
-            fc = linears_recon[i](fc)
-            if i != len(linears_recon) - 1:
-                fc = activation_layers_recon[i](fc)
-                
-        recon_output = fc
-        return recon_output
-
-
     def forward(self, inputs):
         # user towel
         if len(self.user_dnn_feature_columns) > 0:
@@ -93,19 +69,32 @@ class TimTower(DualTower):
             # print(user_sparse_embedding_list,len(user_sparse_embedding_list))
             # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
-            # implicit interaction
-            target_recon_output_for_user = self.implicit_interaction(user_sparse_embedding_list, target=True)
-            non_target_recon_output_for_user = self.implicit_interaction(user_sparse_embedding_list, target=False)
-
             # if torch.cuda.is_available():
             #     self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape).cuda()
             # else:
             #     self.user_aug_vector = torch.rand(user_sparse_embedding_list[-1].shape)
             # user_sparse_embedding_list.append(self.user_aug_vector)
 
+            # implicit interaction user start
+            target_recon_user_fc = combined_dnn_input(sparse_embedding_list=user_sparse_embedding_list, dense_value_list=[])
+            target_recon_user = ImplicitInteraction(target_recon_user_fc.size()[-1], self.hidden_units_for_recon,
+                                                    activation=self.activation_for_recon,
+                                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
+
+            target_recon_output_for_user = target_recon_user(target_recon_user_fc)
+
+            non_target_recon_user = ImplicitInteraction(target_recon_user_fc.size()[-1], self.hidden_units_for_recon,
+                                                        activation=self.activation_for_recon,
+                                                        l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                                        use_bn=self.dnn_use_bn, init_std=self.init_std,
+                                                        device=self.device)
+
+            non_target_recon_output_for_user = non_target_recon_user(target_recon_user_fc)
+            # implicit interaction user end
+
             user_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_user, dim=1))
             user_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_user, dim=1))
-
 
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
 
@@ -121,10 +110,25 @@ class TimTower(DualTower):
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
-            
-            # implicit interaction
-            target_recon_output_for_item = self.implicit_interaction(item_sparse_embedding_list, target=True)
-            non_target_recon_output_for_item = self.implicit_interaction(item_sparse_embedding_list, target=False)
+
+            # implicit interaction user start
+            target_recon_item_fc = combined_dnn_input(sparse_embedding_list=item_sparse_embedding_list,
+                                                      dense_value_list=[])
+            target_recon_item = ImplicitInteraction(target_recon_item_fc.size()[-1], self.hidden_units_for_recon,
+                                                    activation=self.activation_for_recon,
+                                                    l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                                    use_bn=self.dnn_use_bn, init_std=self.init_std, device=self.device)
+
+            target_recon_output_for_item = target_recon_item(target_recon_item_fc)
+
+            non_target_recon_item = ImplicitInteraction(target_recon_item_fc.size()[-1], self.hidden_units_for_recon,
+                                                        activation=self.activation_for_recon,
+                                                        l2_reg=self.l2_reg_dnn, dropout_rate=self.dnn_dropout,
+                                                        use_bn=self.dnn_use_bn, init_std=self.init_std,
+                                                        device=self.device)
+
+            non_target_recon_output_for_item = non_target_recon_item(target_recon_item_fc)
+            # implicit interaction user end
 
             # if torch.cuda.is_available():
             #     self.item_aug_vector = torch.rand(item_sparse_embedding_list[-1].shape).cuda()
