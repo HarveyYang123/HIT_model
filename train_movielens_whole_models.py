@@ -61,7 +61,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
         model = TimTower(user_feature_columns, item_feature_columns,
                          user_input_for_recon=user_feature_columns_for_recon,
                          item_input_for_recon=item_feature_columns_for_recon,
-                         task='binary', dnn_dropout=dropout, device=device)
+                         task='binary', dnn_dropout=dropout, device=device,use_target=False, use_non_target=False)
     else:
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
