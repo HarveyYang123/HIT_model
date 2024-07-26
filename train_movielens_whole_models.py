@@ -61,7 +61,9 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
         model = TimTower(user_feature_columns, item_feature_columns,
                          user_input_for_recon=user_feature_columns_for_recon,
                          item_input_for_recon=item_feature_columns_for_recon,
-                         task='binary', dnn_dropout=dropout, device=device,use_target=False, use_non_target=False)
+                         task='binary', dnn_dropout=dropout, device=device,
+                         hidden_units_for_recon=(32, 32), activation_for_recon='relu',
+                         use_target=True, use_non_target=False)
     else:
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
@@ -102,8 +104,12 @@ def main(args, log):
         device = cuda_number
 
 
+    # es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
+    #                    patience=5, mode='max', baseline=None)
+    # mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
+    #                          mode='max', verbose=1, save_best_only=True, save_weights_only=True)
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
-                       patience=5, mode='max', baseline=None)
+                       patience=8, mode='max')
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
@@ -148,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
-    parser.add_argument("--epoch", type=int, default=10)
+    parser.add_argument("--epoch", type=int, default=30)
     parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)

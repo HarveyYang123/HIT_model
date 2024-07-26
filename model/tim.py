@@ -27,10 +27,14 @@ class TimTower(DualTowerForTim):
                  use_target=True, use_non_target=True):
         super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
-                                       device=device, gpus=gpus)
+                                       device=device, gpus=gpus, use_target=True, use_non_target=True)
 
         self.item_dnn_feature_columns = item_dnn_feature_columns
         self.user_dnn_feature_columns = user_dnn_feature_columns
+        self.user_input_for_recon = user_input_for_recon
+        self.item_input_for_recon = item_input_for_recon
+        print("self.user_input_for_recon: ", self.user_input_for_recon)
+        print("self.item_input_for_recon: ", self.item_input_for_recon)
 
         self.dnn_hidden_units = dnn_hidden_units
         self.dnn_activation = dnn_activation
@@ -113,7 +117,10 @@ class TimTower(DualTowerForTim):
             # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
             # implicit interaction user start
-            target_recon_user_fc = combined_dnn_input(sparse_embedding_list=user_sparse_embedding_list, dense_value_list=[])
+            user_sparse_embedding_list_for_recon, user_dense_value_list_for_recon = \
+                self.input_from_feature_columns(inputs, self.user_input_for_recon, self.user_embedding_dict)
+            target_recon_user_fc = combined_dnn_input(sparse_embedding_list=user_sparse_embedding_list_for_recon,
+                                                      dense_value_list=user_dense_value_list_for_recon)
             if self.use_target:
                 target_recon_output_for_user = self.target_recon_user(target_recon_user_fc)
                 user_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_user, dim=1))
@@ -138,9 +145,11 @@ class TimTower(DualTowerForTim):
                 target_recon_output_for_item = target_recon_output_for_item.cuda()
                 non_target_recon_output_for_item = non_target_recon_output_for_item.cuda()
 
-            target_recon_item_fc = combined_dnn_input(sparse_embedding_list=item_sparse_embedding_list,
-                                                      dense_value_list=[])
             # implicit interaction user start
+            item_sparse_embedding_list_for_recon, item_dense_value_list_for_recon = \
+                self.input_from_feature_columns(inputs, self.item_input_for_recon, self.item_embedding_dict)
+            target_recon_item_fc = combined_dnn_input(sparse_embedding_list=item_sparse_embedding_list_for_recon,
+                                                      dense_value_list=item_dense_value_list_for_recon)
             if self.use_target:
                 target_recon_output_for_item = self.target_recon_item(target_recon_item_fc)
                 item_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_item, dim=1))

@@ -22,9 +22,11 @@ from preprocessing.utils import generation_loss
 
 class DualTowerForTim(nn.Module):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, l2_reg_embedding=1e-5,
-                 init_std=0.0001, seed=1024, task='binary', device='cpu', gpus=None):
+                 init_std=0.0001, seed=1024, task='binary', device='cpu', gpus=None, use_target=True, use_non_target=True):
         super(DualTowerForTim, self).__init__()
         torch.manual_seed(seed)
+        self.use_target = use_target
+        self.use_non_target = use_non_target
 
         self.reg_loss = torch.zeros((1,), device=device)
         self.aux_loss = torch.zeros((1,), device=device)
@@ -141,7 +143,7 @@ class DualTowerForTim(nn.Module):
         for epoch in range(initial_epoch, epochs):
             epoch_logs = {}
             start_time = time.time()
-            loss_epoch = 0
+            # loss_epoch = 0
             total_loss_epoch, predict_loss_epoch, reg_loss_epoch, aux_loss_epoch = 0, 0, 0, 0
             target_generator_for_user_loss_epoch, target_generator_for_item_loss_epoch = 0, 0
             non_target_generator_for_user_loss_epoch, non_target_generator_for_item_loss_epoch = 0, 0
@@ -163,13 +165,6 @@ class DualTowerForTim(nn.Module):
                         = out[0],out[1],out[2],out[3],out[4],out[5],out[6]
 
 
-                    loss_v_tar,loss_u_tar = generation_loss(y_au,user_embedding,item_embedding,
-                                                    target_recon_output_for_user, target_recon_output_for_item,
-                                                    target=True)
-                    loss_v_non_tar,loss_u_non_tar = generation_loss(y_au,user_embedding,item_embedding,
-                                                    non_target_recon_output_for_user, non_target_recon_output_for_item,
-                                                    target=False)
-
                     y_pred = y_pred.squeeze()
 
                     optim.zero_grad()
@@ -178,18 +173,33 @@ class DualTowerForTim(nn.Module):
                     reg_loss = self.get_regularization_loss()
 
                     # total_loss = loss + reg_loss + self.aux_loss + contras
-                    total_loss = loss + reg_loss + self.aux_loss + loss_v_tar + loss_u_tar + loss_v_non_tar + loss_u_non_tar
+                    total_loss = loss + reg_loss + self.aux_loss
+                    alpha_tar = 10 ** (-3)
+                    if self.use_target:
+                        loss_v_tar, loss_u_tar = generation_loss(y_au,user_embedding,item_embedding,
+                                                    target_recon_output_for_user, target_recon_output_for_item,
+                                                    target=True)
+                        total_loss += alpha_tar * (loss_v_tar + loss_u_tar)
+                    if self.use_non_target:
+                        loss_v_non_tar, loss_u_non_tar = generation_loss(y_au,user_embedding,item_embedding,
+                                                    non_target_recon_output_for_user, non_target_recon_output_for_item,
+                                                    target=False)
+                        total_loss += alpha_tar * (loss_v_non_tar + loss_u_non_tar)
+
+
                     # print(total_loss, contras, loss)
 
-                    loss_epoch += loss.item()
+                    # loss_epoch += loss.item()
                     total_loss_epoch += total_loss.item()
                     predict_loss_epoch += loss.item()
                     reg_loss_epoch += reg_loss.item()
                     aux_loss_epoch += self.aux_loss.item()
-                    target_generator_for_user_loss_epoch += loss_v_tar.item()
-                    target_generator_for_item_loss_epoch += loss_u_tar.item()
-                    non_target_generator_for_user_loss_epoch += loss_v_non_tar.item()
-                    non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
+                    if self.use_target:
+                        target_generator_for_user_loss_epoch += loss_v_tar.item()
+                        target_generator_for_item_loss_epoch += loss_u_tar.item()
+                    if self.use_non_target:
+                        non_target_generator_for_user_loss_epoch += loss_v_non_tar.item()
+                        non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
 
                     total_loss.backward()
                     optim.step()
@@ -207,10 +217,12 @@ class DualTowerForTim(nn.Module):
             epoch_logs["predict_loss"] = predict_loss_epoch / sample_num
             epoch_logs["reg_loss"] = reg_loss_epoch / sample_num
             epoch_logs["aux_loss"] = aux_loss_epoch / sample_num
-            epoch_logs["target_generator_for_user_loss"] = target_generator_for_user_loss_epoch / sample_num
-            epoch_logs["target_generator_for_item_loss"] = target_generator_for_item_loss_epoch / sample_num
-            epoch_logs["non_target_generator_for_user_loss"] = non_target_generator_for_user_loss_epoch / sample_num
-            epoch_logs["non_target_generator_for_item_loss"] = non_target_generator_for_item_loss_epoch / sample_num
+            if self.use_target:
+                epoch_logs["target_generator_for_user_loss"] = target_generator_for_user_loss_epoch / sample_num
+                epoch_logs["target_generator_for_item_loss"] = target_generator_for_item_loss_epoch / sample_num
+            if self.use_non_target:
+                epoch_logs["non_target_generator_for_user_loss"] = non_target_generator_for_user_loss_epoch / sample_num
+                epoch_logs["non_target_generator_for_item_loss"] = non_target_generator_for_item_loss_epoch / sample_num
 
 
             for name, result in train_result.items():
@@ -225,14 +237,16 @@ class DualTowerForTim(nn.Module):
                 epoch_time = int(time.time() - start_time)
                 print('Epoch {0}/{1}'.format(epoch + 1, epochs))
 
-                eval_str = "{0}s - loss: {1: .4f}".format(epoch_time, epoch_logs["total_loss"])
+                eval_str = "{0}s - total_loss: {1: .4f}".format(epoch_time, epoch_logs["total_loss"])
                 eval_str += " - predict_loss: {0: .4f}".format(epoch_logs["predict_loss"])
                 eval_str += " - reg_loss: {0: .4f}".format(epoch_logs["reg_loss"])
                 eval_str += " - aux_loss: {0: .4f}".format(epoch_logs["aux_loss"])
-                eval_str += " - target_generator_for_user_loss: {0: .8f}".format(epoch_logs["target_generator_for_user_loss"])
-                eval_str += " - target_generator_for_item_loss: {0: .8f}".format(epoch_logs["target_generator_for_item_loss"])
-                eval_str += " - non_target_generator_for_user_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_user_loss"])
-                eval_str += " - non_target_generator_for_item_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_item_loss"])
+                if self.use_target:
+                    eval_str += " - target_generator_for_user_loss: {0: .8f}".format(epoch_logs["target_generator_for_user_loss"])
+                    eval_str += " - target_generator_for_item_loss: {0: .8f}".format(epoch_logs["target_generator_for_item_loss"])
+                if self.use_non_target:
+                    eval_str += " - non_target_generator_for_user_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_user_loss"])
+                    eval_str += " - non_target_generator_for_item_loss: {0: .8f}".format(epoch_logs["non_target_generator_for_item_loss"])
 
                 for name in self.metrics:
                     eval_str += " - " + name + ": {0: .4f} ".format(epoch_logs[name]) + " - " + \
