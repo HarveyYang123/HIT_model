@@ -5,7 +5,7 @@
 #models=("dat" "deep_fm" "dssm" "int_tower" "wide_and_deep")
 #models=("int_tower" "tim" "dat")
 
-models=("dat")
+models=("dat" "tim")
 for model in "${models[@]}"; do
   echo "Current model: $model"
   # 在这里执行你需要对每个model变量进行的操作
