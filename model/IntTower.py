@@ -18,7 +18,7 @@ from layers.interaction import LightSE
 class IntTower(BaseTower):
 
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
-                 dnn_hidden_units=(300, 300, 128), field_dim = 32, user_head=1,item_head=1, dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
+                 dnn_hidden_units=(300, 300, 128), field_dim = 64, user_head=2,item_head=2, dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout = 0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None,user_filed_size = 1,
                  item_filed_size = 1):
         super(IntTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
@@ -29,6 +29,9 @@ class IntTower(BaseTower):
             self.user_fe_dnn= User_Fe_DNN(compute_input_dim(user_dnn_feature_columns),field_dim, dnn_hidden_units,
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, user_head = user_head, init_std=init_std, device=device)
+            # self.user_dnn = DNN(compute_input_dim(user_dnn_feature_columns), dnn_hidden_units,
+            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.user_dnn_embedding = None
             # self.user_col_rep = []
 
@@ -36,6 +39,9 @@ class IntTower(BaseTower):
             self.item_fe_dnn = Item_Fe_DNN(compute_input_dim(item_dnn_feature_columns), field_dim,dnn_hidden_units,
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, item_head = item_head,init_std=init_std, device=device)
+            # self.item_dnn = DNN(compute_input_dim(item_dnn_feature_columns), dnn_hidden_units,
+            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.item_dnn_embedding = None
             # self.item_col_rep = []
 
@@ -76,6 +82,8 @@ class IntTower(BaseTower):
             self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
 
+            # user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
+            # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
 
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
@@ -91,6 +99,8 @@ class IntTower(BaseTower):
             self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
 
+            # item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
+            # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
 
@@ -99,6 +109,9 @@ class IntTower(BaseTower):
                              [self.field_dim, self.field_dim,self.field_dim])
 
             output = self.out(score)
+
+            # score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
+            # output = self.out(score)
             return output, self.user_dnn_embedding, self.item_dnn_embedding
 
         elif len(self.user_dnn_feature_columns) > 0:

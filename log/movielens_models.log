@@ -46,3 +46,48 @@
 2024-07-28 21:13:03,227 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:143] - INFO: model_name = tim; evaluate:{'auc': 0.8108843537414965, 'accuracy': 0.9074074074074074, 'logloss': 0.3478992428752135}
 2024-07-28 21:13:03,246 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = tim; test LogLoss, 0.49
 2024-07-28 21:13:03,252 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:148] - INFO: model_name = tim; test AUC, 0.8447
+2024-07-29 11:39:47,715 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 11:39:47,829 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 11:42:32,491 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 11:42:32,595 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 11:42:36,441 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:143] - INFO: model_name = tim; evaluate:{'auc': 0.9981859410430838, 'accuracy': 0.9074074074074074, 'logloss': 0.49021210881309113}
+2024-07-29 11:42:36,464 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = tim; test LogLoss, 0.5528
+2024-07-29 11:42:36,471 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:148] - INFO: model_name = tim; test AUC, 1.0
+2024-07-29 15:03:09,096 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 15:03:09,190 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:29] - INFO: model_name int_tower
+2024-07-29 15:07:58,924 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 15:07:59,038 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:29] - INFO: model_name int_tower
+2024-07-29 15:08:01,697 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:143] - INFO: model_name = int_tower; evaluate:{'auc': 0.8247165532879819, 'accuracy': 0.9074074074074074, 'logloss': 0.5483781925564201}
+2024-07-29 15:08:01,713 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = int_tower; test LogLoss, 0.5899
+2024-07-29 15:08:01,719 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:148] - INFO: model_name = int_tower; test AUC, 0.7614
+2024-07-29 15:59:46,254 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 15:59:46,507 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:29] - INFO: model_name int_tower
+2024-07-29 19:33:13,043 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 19:33:13,151 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 19:36:07,095 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 19:36:07,179 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 19:38:14,998 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 19:38:15,095 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 19:39:00,662 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 19:39:00,751 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 19:39:03,425 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:143] - INFO: model_name = tim; evaluate:{'auc': 0.8108843537414965, 'accuracy': 0.9074074074074074, 'logloss': 0.5447726558326167}
+2024-07-29 19:39:03,438 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = tim; test LogLoss, 0.59
+2024-07-29 19:39:03,442 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:148] - INFO: model_name = tim; test AUC, 0.8864
+2024-07-29 20:10:31,184 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:10:31,301 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:17:33,541 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:17:33,634 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:18:35,895 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:18:36,014 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:19:53,193 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:19:53,440 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:27:18,074 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:96] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:27:18,200 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:27:21,048 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:143] - INFO: model_name = tim; evaluate:{'auc': 0.8081632653061224, 'accuracy': 0.9074074074074074, 'logloss': 0.49156866556851403}
+2024-07-29 20:27:21,059 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = tim; test LogLoss, 0.5547
+2024-07-29 20:27:21,063 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:148] - INFO: model_name = tim; test AUC, 0.8864
+2024-07-29 20:49:55,590 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:95] - INFO: the fold './checkpoints' already exists.
+2024-07-29 20:49:55,709 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:60] - INFO: model_name tim
+2024-07-29 20:49:59,195 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:142] - INFO: model_name = tim; evaluate:{'auc': 0.5850340136054422, 'accuracy': 0.9074074074074074, 'logloss': 0.4548116504585867}
+2024-07-29 20:49:59,211 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:146] - INFO: model_name = tim; test LogLoss, 0.5339
+2024-07-29 20:49:59,213 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:147] - INFO: model_name = tim; test AUC, 0.8447

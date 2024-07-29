@@ -23,10 +23,10 @@ from layers.core import User_Fe_DNN,Item_Fe_DNN
 
 class TimTower(DualTowerForTim):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
-                 gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 64, user_head=2,item_head=2,
+                 gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
                  dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
-                 dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 6,
-                 item_filed_size = 3, hidden_units_for_recon=(128, 128), activation_for_recon='relu',
+                 dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
+                 item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
                  use_target=True, use_non_target=True):
         super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
@@ -160,11 +160,14 @@ class TimTower(DualTowerForTim):
             # else:
             #     user_dnn_input = sparse_dnn_input
 
-            user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
 
+            user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
+
             self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
+
+
 
         # item tower
         if len(self.item_dnn_feature_columns) > 0:
@@ -209,10 +212,13 @@ class TimTower(DualTowerForTim):
             # item_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
-
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
+
             self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
+
+
+
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
             # score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
@@ -221,7 +227,6 @@ class TimTower(DualTowerForTim):
             score = fe_score(self.user_fe_rep, self.item_fe_rep, self.user_head, self.item_head,
                              [self.field_dim,self.field_dim,self.field_dim],
                              [self.field_dim, self.field_dim,self.field_dim])
-
             output = self.out(score)
 
             return output, self.user_dnn_embedding, self.item_dnn_embedding, \
