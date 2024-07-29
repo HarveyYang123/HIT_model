@@ -64,7 +64,6 @@ class IntTower(BaseTower):
                 self.input_from_feature_columns(inputs, self.user_dnn_feature_columns, self.user_embedding_dict)
 
             user_sparse_embedding = torch.cat(user_sparse_embedding_list, dim=1)
-
             User_sim_embedding = self.User_sim_non_local(user_sparse_embedding)
             sparse_dnn_input = torch.flatten(User_sim_embedding, start_dim=1)
             if(len(user_dense_value_list)>0):
@@ -73,6 +72,7 @@ class IntTower(BaseTower):
             else:
                 user_dnn_input = sparse_dnn_input
 
+            # user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list) # haoq
             self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
 
@@ -81,24 +81,22 @@ class IntTower(BaseTower):
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
 
-
             item_sparse_embedding = torch.cat(item_sparse_embedding_list, dim=1)
             Item_sim_embedding = self.Item_sim_non_local(item_sparse_embedding)
             sparse_dnn_input = torch.flatten(Item_sim_embedding, start_dim=1)
             dense_dnn_input = torch.flatten(torch.cat(item_dense_value_list, dim=-1), start_dim=1)
-
             item_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)
 
-
+            # item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list) # haoq
             self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
 
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
 
-            score = fe_score(self.user_fe_rep, self.item_fe_rep, self.user_head,\
-                self.item_head,[self.field_dim,self.field_dim,self.field_dim],[self.field_dim,
-                                                                                                self.field_dim,self.field_dim])
+            score = fe_score(self.user_fe_rep, self.item_fe_rep, self.user_head, self.item_head,
+                             [self.field_dim,self.field_dim,self.field_dim],
+                             [self.field_dim, self.field_dim,self.field_dim])
 
             output = self.out(score)
             return output, self.user_dnn_embedding, self.item_dnn_embedding

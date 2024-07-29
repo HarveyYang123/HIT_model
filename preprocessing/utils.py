@@ -73,6 +73,37 @@ def generation_loss(y, user_embedding, item_embedding, user_generator_vector, it
         loss_v = torch.mean(torch.pow((1 - y) * item_generator_vector + y * user_embedding_new - user_embedding_new, 2))
     return loss_u,loss_v
 
+def generation_cosine_loss(y, user_embedding, item_embedding, user_generator_vector, item_generator_vector, target=True):
+    # stop gradient
+    user_embedding_new = user_embedding.detach()
+    item_embedding_new = item_embedding.detach()
+
+    # normalize the embeddings to have unit length
+    user_norm = torch.nn.functional.normalize(user_embedding_new, p=2, dim=1)
+    item_norm = torch.nn.functional.normalize(item_embedding_new, p=2, dim=1)
+
+    # # normalize the generator vectors  - done in class "ImplicitInteraction"
+    user_gen_norm = torch.nn.functional.normalize(user_generator_vector, p=2, dim=1)
+    item_gen_norm = torch.nn.functional.normalize(item_generator_vector, p=2, dim=1)
+    # user_gen_norm = user_generator_vector
+    # item_gen_norm = item_generator_vector
+
+    if target:
+        # positive samples
+        cosine_similarity_u = torch.sum(user_gen_norm * item_norm, dim=1)
+        cosine_similarity_v = torch.sum(item_gen_norm * user_norm, dim=1)
+    else:
+        # negative samples
+        # You can define how to handle negative samples based on your task
+        # For example, you can use the negative of the cosine similarity
+        cosine_similarity_u = -torch.sum(user_gen_norm * item_norm, dim=1)
+        cosine_similarity_v = -torch.sum(item_gen_norm * user_norm, dim=1)
+
+    # convert cosine similarity to loss
+    loss_u = 1 - cosine_similarity_u.mean()
+    loss_v = 1 - cosine_similarity_v.mean()
+
+    return loss_u, loss_v
 
 def contrast_loss(y, user_embedding, item_embedding):
     # Normalize the embeddings

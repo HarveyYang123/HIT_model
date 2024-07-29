@@ -63,6 +63,8 @@ class ImplicitInteraction(nn.Module):
 
             fc = self.dropout(fc)
             deep_input = fc
+        # # l2 norm
+        # deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
         return deep_input
 
 class LightSE(nn.Module):

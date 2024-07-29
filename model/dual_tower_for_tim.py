@@ -17,7 +17,7 @@ from preprocessing.utils import slice_arrays
 from tensorflow.python.keras.callbacks import CallbackList
 from preprocessing.callbacks import History
 from preprocessing.utils import contrast_loss
-from preprocessing.utils import generation_loss
+from preprocessing.utils import generation_cosine_loss
 
 
 class DualTowerForTim(nn.Module):
@@ -176,12 +176,12 @@ class DualTowerForTim(nn.Module):
                     total_loss = loss + reg_loss + self.aux_loss
                     alpha_tar = 10 ** (-3)
                     if self.use_target:
-                        loss_v_tar, loss_u_tar = generation_loss(y_au,user_embedding,item_embedding,
+                        loss_v_tar, loss_u_tar = generation_cosine_loss(y_au,user_embedding,item_embedding,
                                                     target_recon_output_for_user, target_recon_output_for_item,
                                                     target=True)
                         total_loss += alpha_tar * (loss_v_tar + loss_u_tar)
                     if self.use_non_target:
-                        loss_v_non_tar, loss_u_non_tar = generation_loss(y_au,user_embedding,item_embedding,
+                        loss_v_non_tar, loss_u_non_tar = generation_cosine_loss(y_au,user_embedding,item_embedding,
                                                     non_target_recon_output_for_user, non_target_recon_output_for_item,
                                                     target=False)
                         total_loss += alpha_tar * (loss_v_non_tar + loss_u_non_tar)

@@ -28,7 +28,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
     if model_name == "int_tower":
         log.logger.info("model_name int_tower")
         model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=5, item_filed_size=2)
+                         device=device, user_head=2, item_head=2, user_filed_size=5, item_filed_size=2)
     elif model_name == "dssm":
         log.logger.info("model_name dssm")
         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
@@ -62,7 +62,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                          user_input_for_recon=user_feature_columns_for_recon,
                          item_input_for_recon=item_feature_columns_for_recon,
                          task='binary', dnn_dropout=dropout, device=device,
-                         hidden_units_for_recon=(32, 32), activation_for_recon='relu',
+                         hidden_units_for_recon=(128, 128), activation_for_recon='relu',
                          use_target=True, use_non_target=False)
     else:
         log.logger.info("model_name wide_and_deep")
@@ -109,7 +109,7 @@ def main(args, log):
     # mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
     #                          mode='max', verbose=1, save_best_only=True, save_weights_only=True)
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
-                       patience=8, mode='max')
+                       patience=5, mode='max')
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
