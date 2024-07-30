@@ -175,6 +175,7 @@ class BaseTower(nn.Module):
 
                     # total_loss = loss + reg_loss + self.aux_loss + contras
                     total_loss = loss + reg_loss + self.aux_loss
+                    # total_loss = loss
                     # print(total_loss, contras, loss)
 
                     loss_epoch += loss.item()
