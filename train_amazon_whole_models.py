@@ -7,68 +7,12 @@ import argparse
 
 from sklearn.metrics import log_loss, roc_auc_score
 
-from model.IntTower import IntTower
-from model.dssm import DSSM
-from model.deepfm import DeepFM
-from model.dcn import DCN
-from model.dat import DAT
-from model.cold import Cold
-from model.autoint import AutoInt
-from model.wdm import WideDeep
-from model.tim import TimTower
-
+from preprocessing.model_select import chooseModel
 from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
 from preprocessing.logging import Logger
 from preprocessing.dataProcess import amazonDataProcess, setup_seed
 
-
-def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
-                dnn_feature_columns, dropout, device):
-    if model_name == "int_tower":
-        log.logger.info("model_name int_tower")
-        model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=1, item_filed_size=2)
-    elif model_name == "dssm":
-        log.logger.info("model_name dssm")
-        model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
-    elif model_name == "dat":
-        log.logger.info("model_name dat")
-        model = DAT(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    elif model_name == "deep_fm":
-        log.logger.info("model name deep_fm")
-        model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                       device=device)
-    elif model_name == "dcn":
-        log.logger.info("model_name dcn")
-        model = DCN(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    elif model_name == "cold":
-        log.logger.info("model_name cold")
-        model = Cold(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                     device=device)
-    elif model_name == "auto_int":
-        log.logger.info("model_name auto_int")
-        model = AutoInt(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                        device=device)
-    elif model_name == "wide_and_deep":
-        log.logger.info("model_name wide_and_deep")
-        model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
-                         device=device)
-    elif model_name == "tim_tower":
-        log.logger.info("model_name tim_tower")
-        model = TimTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=5, item_filed_size=2)
-    else:
-        log.logger.info("model_name wide_and_deep")
-        model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
-                         device=device)
-        raise ValueError("There is no such value for model_name")
-
-    return model
-
 def main(args, log):
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim_tower"]
     model_name = args.model_name
     ckpt_fold = args.ckpt_fold
 
@@ -78,7 +22,7 @@ def main(args, log):
     lr = args.lr
     dropout = args.dropout
 
-    setup_seed(seed=1023)
+    setup_seed(seed=args.random_seed)
 
     ckpt_path = '{}/{}.ckpt'.format(ckpt_fold, model_name)
     # 检查文件夹是否存在
@@ -89,7 +33,7 @@ def main(args, log):
     else:
         log.logger.info(f"文件夹'{ckpt_fold}'已存在。")
 
-    Data = amazonDataProcess(log, args.data_path, embedding_dim)
+    AmazonData = amazonDataProcess(log, args.data_path, embedding_dim)
 
     # Define Model,train,predict and evaluate
     device = 'cpu'
@@ -103,17 +47,18 @@ def main(args, log):
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
     # 仅用于非双塔的模型
-    linear_feature_columns = Data.user_feature_columns + Data.item_feature_columns
-    user_feature_columns = Data.user_feature_columns
-    item_feature_columns = Data.item_feature_columns
+    linear_feature_columns = AmazonData.user_feature_columns + AmazonData.item_feature_columns
+    user_feature_columns = AmazonData.user_feature_columns
+    item_feature_columns = AmazonData.item_feature_columns
     dnn_feature_columns = linear_feature_columns
-
-    model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
-                dropout, device)
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss']
-                  , lr=lr)
+    
+    model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
+                        dnn_feature_columns, dropout, device, log, data_name="Amazon",
+                        user_feature_columns_for_recon=AmazonData.user_feature_columns_for_recon,
+                        item_feature_columns_for_recon=AmazonData.item_feature_columns_for_recon)
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
-    model.fit(Data.train_model_input, Data.train[Data.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
+    model.fit(AmazonData.train_model_input, AmazonData.train[AmazonData.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
               validation_split=0.2,
               callbacks=[es, mdckpt])
 
@@ -123,26 +68,27 @@ def main(args, log):
 
     # Evaluate
     # 看下最佳模型在完整的训练集上的表现
-    eval_tr = model.evaluate(Data.train_model_input, Data.train[Data.target].values)
+    eval_tr = model.evaluate(AmazonData.train_model_input, AmazonData.train[AmazonData.target].values)
     log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
 
     # %%
-    pred_ts = model.predict(Data.test_model_input, batch_size=2048)
-    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(Data.test[Data.target].values, pred_ts), 4)}")
-    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(Data.test[Data.target].values, pred_ts), 4)}")
+    pred_ts = model.predict(AmazonData.test_model_input, batch_size=2048)
+    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim_tower"]
-    parser.add_argument("--model_name", type=str, default="int_tower")
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
+    parser.add_argument("--model_name", type=str, default="dssm")
     parser.add_argument("--data_path", type=str, default="./data/amazon_eletronics.csv")
-    parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
+    parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/amazon")
     parser.add_argument("--embedding_dim", type=int, default=32)
-    parser.add_argument("--epoch", type=int, default=10)
+    parser.add_argument("--epoch", type=int, default=30)
     parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
+    parser.add_argument("--random_seed", type=int, default=1023)
     opt = parser.parse_args()
     log = Logger('./log/movielens_models.log', level='debug')
     main(opt, log)

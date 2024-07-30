@@ -7,70 +7,71 @@ import argparse
 
 from sklearn.metrics import log_loss, roc_auc_score
 
-from model.IntTower import IntTower
-from model.dssm import DSSM
-from model.deepfm import DeepFM
-from model.dcn import DCN
-from model.dat import DAT
-from model.cold import Cold
-from model.autoint import AutoInt
-from model.wdm import WideDeep
-from model.tim import TimTower
-from model.KAN_TimTower import KanTimTower
+# from model.IntTower import IntTower
+# from model.dssm import DSSM
+# from model.deepfm import DeepFM
+# from model.dcn import DCN
+# from model.dat import DAT
+# from model.cold import Cold
+# from model.autoint import AutoInt
+# from model.wdm import WideDeep
+# from model.tim import TimTower
+# from model.KAN_TimTower import KanTimTower
 
+from preprocessing.model_select import chooseModel
 from preprocessing.callbacks import EarlyStopping, ModelCheckpoint
 from preprocessing.logging import Logger
 from preprocessing.dataProcess import taobaoDataProcess, setup_seed
 
 
-def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
-                dnn_feature_columns, dropout, device):
-    if model_name == "int_tower":
-        log.logger.info("model_name int_tower")
-        model = IntTower(user_feature_columns, item_feature_columns, field_dim=16, task='binary', dnn_dropout=dropout,
-                         device=device, user_head=32, item_head=32, user_filed_size=9, item_filed_size=6)
-    elif model_name == "dssm":
-        log.logger.info("model_name dssm")
-        model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
-    elif model_name == "dat":
-        log.logger.info("model_name dat")
-        model = DAT(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    elif model_name == "deep_fm":
-        log.logger.info("model name deep_fm")
-        model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                       device=device)
-    elif model_name == "dcn":
-        log.logger.info("model_name dcn")
-        model = DCN(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    elif model_name == "cold":
-        log.logger.info("model_name cold")
-        model = Cold(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                     device=device)
-    elif model_name == "auto_int":
-        log.logger.info("model_name auto_int")
-        model = AutoInt(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
-                        device=device)
-    elif model_name == "wide_and_deep":
-        log.logger.info("model_name wide_and_deep")
-        model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
-                         device=device)
-    elif model_name == "tim":
-        log.logger.info("model_name tim")
-        model = TimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    elif model_name == "kan_Tim":
-        log.logger.info("model_name kan_Tim")
-        model = KanTimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
-                    device=device)
-    else:
-        log.logger.info("model_name wide_and_deep")
-        model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
-                         device=device)
-        raise ValueError("There is no such value for model_name")
-
-    return model
+# def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
+#                 dnn_feature_columns, dropout, device):
+#     if model_name == "int_tower":
+#         log.logger.info("model_name int_tower")
+#         model = IntTower(user_feature_columns, item_feature_columns, field_dim=16, task='binary', dnn_dropout=dropout,
+#                          device=device, user_head=32, item_head=32, user_filed_size=9, item_filed_size=6)
+#     elif model_name == "dssm":
+#         log.logger.info("model_name dssm")
+#         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
+#     elif model_name == "dat":
+#         log.logger.info("model_name dat")
+#         model = DAT(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
+#                     device=device)
+#     elif model_name == "deep_fm":
+#         log.logger.info("model name deep_fm")
+#         model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
+#                        device=device)
+#     elif model_name == "dcn":
+#         log.logger.info("model_name dcn")
+#         model = DCN(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
+#                     device=device)
+#     elif model_name == "cold":
+#         log.logger.info("model_name cold")
+#         model = Cold(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
+#                      device=device)
+#     elif model_name == "auto_int":
+#         log.logger.info("model_name auto_int")
+#         model = AutoInt(linear_feature_columns, dnn_feature_columns, task='binary', dnn_dropout=dropout,
+#                         device=device)
+#     elif model_name == "wide_and_deep":
+#         log.logger.info("model_name wide_and_deep")
+#         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
+#                          device=device)
+#     elif model_name == "tim":
+#         log.logger.info("model_name tim")
+#         model = TimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
+#                     device=device)
+#     elif model_name == "kan_Tim":
+#         log.logger.info("model_name kan_Tim")
+#         model = KanTimTower(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,
+#                     device=device)
+#     else:
+#         log.logger.info("model_name wide_and_deep")
+#         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',
+#                          device=device)
+#         raise ValueError("There is no such value for model_name")
+#
+#     return model
 
 def main(args, log):
     model_name = args.model_name
@@ -111,9 +112,15 @@ def main(args, log):
     user_feature_columns = taobaoData.user_feature_columns
     item_feature_columns = taobaoData.item_feature_columns
     dnn_feature_columns = linear_feature_columns
+    user_feature_columns_for_recon = taobaoData.user_feature_columns_for_recon
+    item_feature_columns_for_recon = taobaoData.item_feature_columns_for_recon
 
-    model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
-                dropout, device)
+    # model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns, dnn_feature_columns,
+    #             dropout, device)
+
+    model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
+                        dnn_feature_columns,
+                        dropout, device, log, user_feature_columns_for_recon, item_feature_columns_for_recon)
     
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
@@ -151,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument("--cuda_number", type=str, default="cuda:1")
     parser.add_argument("--embedding_dim", type=int, default=32)
-    parser.add_argument("--epoch", type=int, default=10)
+    parser.add_argument("--epoch", type=int, default=30)
     parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)

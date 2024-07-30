@@ -3,8 +3,7 @@ import torch.nn as nn
 from layers.activation import activation_layer
 from tensorflow.python.keras.layers import Layer
 import tensorflow as tf
-
-
+from layers.denseKAN import DenseKAN
 
 
 class SampledSoftmaxLayer(Layer):
@@ -71,8 +70,11 @@ class PredictionLayer(nn.Module):
         output = X
         if self.use_bias:
             output += self.bias
+
         if self.task == "binary":
             output = torch.sigmoid(X)
+
+        # print(f"output:{output}")
         return output
 
 
@@ -130,7 +132,7 @@ class DNN(nn.Module):
 
 class User_Fe_DNN(nn.Module):
     def __init__(self, inputs_dim, field_dim, hidden_units, activation='relu', l2_reg=0, dropout_rate=0, use_bn=False,
-                 init_std=0.0001, user_head =6,  dice_dim=3, seed=1024, device='cpu'):
+                 init_std=0.0001, user_head =6,  dice_dim=3, seed=1024, use_kan=False, device='cpu'):
         super(User_Fe_DNN, self).__init__()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(dropout_rate)
@@ -138,6 +140,7 @@ class User_Fe_DNN(nn.Module):
         self.l2_reg = l2_reg
         self.use_bn = use_bn
         self.user_head = user_head
+        self.use_kan = use_kan
         self.field_dim = field_dim
         if len(hidden_units) == 0:
             raise ValueError("hidden_units is empty!!")
@@ -149,6 +152,7 @@ class User_Fe_DNN(nn.Module):
         self.linears = nn.ModuleList(
             [nn.Linear(hidden_units[i], hidden_units[i+1]) for i in range(len(hidden_units) - 1)])
 
+        self.kan_dense = DenseKAN(hidden_units[-1], grid_size=5, device=device, kan_name="user_kan")
 
         self.Fe_linears = nn.ModuleList(
             [nn.Linear(hidden_units[i], self.field_dim*self.user_head) for i in range(len(hidden_units) - 1)])
@@ -176,6 +180,9 @@ class User_Fe_DNN(nn.Module):
             fc = self.linears[i](deep_input)
             user_temp = self.Fe_linears[i](deep_input)
 
+            if i == len(self.linears) - 1 and self.use_kan:
+                user_temp = self.kan_dense(user_temp)
+
             self.user_fe_rep.append(user_temp)
 
             if self.use_bn:
@@ -190,13 +197,14 @@ class User_Fe_DNN(nn.Module):
 
 class Item_Fe_DNN(nn.Module):
     def __init__(self, inputs_dim, field_dim, hidden_units, activation='relu', l2_reg=0, dropout_rate=0, use_bn=False,
-                 init_std=0.0001, item_head = 3, dice_dim=3, seed=1024, device='cpu'):
+                 init_std=0.0001, item_head = 3, dice_dim=3, seed=1024, use_kan=False, device='cpu'):
         super(Item_Fe_DNN, self).__init__()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(dropout_rate)
         self.seed = seed
         self.l2_reg = l2_reg
         self.use_bn = use_bn
+        self.use_kan = use_kan
         self.item_head = item_head
         self.field_dim = field_dim
         if len(hidden_units) == 0:
@@ -215,6 +223,8 @@ class Item_Fe_DNN(nn.Module):
 
         self.Fe_linears = nn.ModuleList(
             [nn.Linear(hidden_units[-1], self.field_dim * self.item_head)])
+
+        self.kan_dense = DenseKAN(self.field_dim * self.item_head, grid_size=5, device=device, kan_name="user_kan")
 
         if self.use_bn:
             self.bn = nn.ModuleList(
@@ -247,6 +257,8 @@ class Item_Fe_DNN(nn.Module):
         for i in range(len(self.Fe_linears)):
             item_temp = self.Fe_linears[i](deep_input)
             # print("item_col_rep", item_temp.shape)
+            if i == len(self.Fe_linears) - 1 and self.use_kan:
+                item_temp = self.kan_dense(item_temp)
             self.item_fe_rep.append(item_temp)
         return self.item_fe_rep
 

@@ -182,16 +182,12 @@ class amazonDataProcess():
             lbe = LabelEncoder()
             lbe.fit(data[feat])
             data[feat] = lbe.transform(data[feat])
-            # data[feat] = lbe.transform(test[feat])
+
         mms = MinMaxScaler(feature_range=(0, 1))
         mms.fit(data[dense_features])
         data[dense_features] = mms.transform(data[dense_features])
 
         self.train, self.test = train_test_split(data, test_size=0.2)
-
-        # 2.preprocess the sequence feature
-        # genres_key2index, train_genres_list, genres_maxlen = get_var_feature(train, 'genres')
-        user_key2index, train_user_hist, user_maxlen = self.get_var_feature(self.train, 'user_hist')
 
         self.user_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(user_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
@@ -199,6 +195,10 @@ class amazonDataProcess():
         self.item_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
+
+        self.user_feature_columns_for_recon = self.user_feature_columns
+        self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                               for i, feat in enumerate(item_sparse_features)]
 
         self.train_model_input = {name: self.train[name] for name in sparse_features + dense_features}
         self.test_model_input = {name: self.test[name] for name in sparse_features + dense_features}
@@ -230,24 +230,6 @@ class amazonDataProcess():
         data_group.rename(columns={'overall': 'item_mean_rating'}, inplace=True)
         data = pd.merge(data_group, data, on='asin')
         return data
-
-    def get_var_feature(self, data, col):
-        key2index = {}
-
-        def split(x):
-            key_ans = x.split('|')
-            for key in key_ans:
-                if key not in key2index:
-                    # Notice : input value 0 is a special "padding",\
-                    # so we do not use 0 to encode valid feature for sequence input
-                    key2index[key] = len(key2index) + 1
-            return list(map(lambda x: key2index[x], key_ans))
-
-        var_feature = list(map(split, data[col].values))
-        var_feature_length = np.array(list(map(len, var_feature)))
-        max_len = max(var_feature_length)
-        var_feature = pad_sequences(var_feature, maxlen=max_len, padding='post', )
-        return key2index, var_feature, max_len
 
     def get_test_var_feature(self, data, col, key2index, max_len):
         print("user_hist_list: \n")
@@ -305,6 +287,12 @@ class taobaoDataProcess():
         self.item_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
+
+        self.user_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                               for i, feat in enumerate(user_sparse_features)]
+
+        self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
+                                               for i, feat in enumerate(item_sparse_features)]
 
         self.train_model_input = {name: self.train[name] for name in sparse_features + dense_features}
 

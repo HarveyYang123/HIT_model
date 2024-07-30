@@ -200,10 +200,12 @@ def fe_score(user_rep, item_rep, user_fea_col, item_fea_col, user_embedding_dim,
         # print(item_temp.shape)
         score.append((user_temp @ item_temp.permute(0, 2, 1)).max(2).values.sum(1))
     # all_score = 0.4 * score[0] + 0.2*score[1] + 0.4*score[2]
+    # print(f"score:{score}")
     score = torch.stack(score).transpose(1, 0)
-    # # print(torch.sum(score,1))
+    # print(torch.sum(score,1))
     # all_score = all_score.unsqueeze(1)
     # # print(all_score.shape)
     # return all_score
+    # return torch.mean(score, 1)
     return torch.sum(score, 1)
 

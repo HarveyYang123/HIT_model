@@ -174,7 +174,8 @@ class DualTowerForTim(nn.Module):
 
                     # total_loss = loss + reg_loss + self.aux_loss + contras
                     total_loss = loss + reg_loss + self.aux_loss
-                    alpha_tar = 10 ** (-3)
+                    # alpha_tar = 10 ** (-3)
+                    alpha_tar = 10 ** (-1)
                     if self.use_target:
                         loss_v_tar, loss_u_tar = generation_cosine_loss(y_au,user_embedding,item_embedding,
                                                     target_recon_output_for_user, target_recon_output_for_item,
