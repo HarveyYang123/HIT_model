@@ -247,10 +247,10 @@ class amazonDataProcess():
         test_hist = pad_sequences(test_hist, maxlen=max_len, padding='post')
         return test_hist
 
-
 class taobaoDataProcess():
-    def __init__(self, log, profile_path, ad_path, user_path, embedding_dim):
+    def __init__(self, log, profile_path, ad_path, user_path, embedding_dim, sample_rate=1.):
         self.log = log
+        self.sample_rate = sample_rate
         data = self.data_process(profile_path, ad_path, user_path)
         data = self.get_user_feature(data)
 
@@ -272,6 +272,7 @@ class taobaoDataProcess():
             lbe = LabelEncoder()
             lbe.fit(data[feat])
             data[feat] = lbe.transform(data[feat])
+
         mms = MinMaxScaler(feature_range=(0, 1))
         mms.fit(data[dense_features])
         data[dense_features] = mms.transform(data[dense_features])
@@ -279,8 +280,6 @@ class taobaoDataProcess():
         self.train, self.test = train_test_split(data, test_size=0.2)
 
         # 2.preprocess the sequence feature
-        # genres_key2index, train_genres_list, genres_maxlen = get_var_feature(train, 'genres')
-        user_key2index, train_user_hist, user_maxlen = self.get_var_feature(self.train, 'user_hist')
         self.user_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(user_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    user_dense_features]
@@ -315,6 +314,7 @@ class taobaoDataProcess():
                 converted_obj.loc[:, col] = gl_obj[col].astype('category')
             else:
                 converted_obj.loc[:, col] = gl_obj[col]
+
         optimized_gl[converted_obj.columns] = converted_obj
         return optimized_gl
 
@@ -332,6 +332,9 @@ class taobaoDataProcess():
 
     def data_process(self, profile_path, ad_path, user_path):
         profile_data = pd.read_csv(profile_path)
+        if self.sample_rate < 0.9:
+            profile_data =  profile_data.sample(frac=self.sample_rate)
+
         ad_data = pd.read_csv(ad_path)
         user_data = pd.read_csv(user_path)
         profile_data = self.optimiz_memory_profile(profile_data)
@@ -362,24 +365,6 @@ class taobaoDataProcess():
         #     data_group.rename(columns={'overall': 'user_mean_rating'}, inplace=True)
         data = pd.merge(data_group, data, on='userid')
         return data
-
-    def get_var_feature(self, data, col):
-        key2index = {}
-
-        def split(x):
-            key_ans = x.split('|')
-            for key in key_ans:
-                if key not in key2index:
-                    # Notice : input value 0 is a special "padding",\
-                    # so we do not use 0 to encode valid feature for sequence input
-                    key2index[key] = len(key2index) + 1
-            return list(map(lambda x: key2index[x], key_ans))
-
-        var_feature = list(map(split, data[col].values))
-        var_feature_length = np.array(list(map(len, var_feature)))
-        max_len = max(var_feature_length)
-        var_feature = pad_sequences(var_feature, maxlen=max_len, padding='post', )
-        return key2index, var_feature, max_len
 
     def get_test_var_feature(self, data, col, key2index, max_len):
         print("user_hist_list: \n")
