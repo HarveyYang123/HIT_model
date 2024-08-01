@@ -335,9 +335,8 @@ class taobaoDataProcess():
 
     def data_process(self, profile_path, ad_path, user_path):
         profile_data = pd.read_csv(profile_path)
-        # if self.sample_rate < 0.9:
-        #     profile_data = profile_data.sample(frac=self.sample_rate, random_state=1)
-        profile_data = profile_data.sample(frac=self.sample_rate, random_state=1).reset_index(drop=True)
+        if self.sample_rate < 0.9:
+            profile_data = profile_data.sample(frac=self.sample_rate, random_state=1)
 
         ad_data = pd.read_csv(ad_path)
         user_data = pd.read_csv(user_path)

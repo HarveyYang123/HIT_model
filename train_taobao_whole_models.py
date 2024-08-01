@@ -63,7 +63,7 @@ def main(args, log):
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
     model.fit(taobaoData.train_model_input, taobaoData.train[taobaoData.target].values, batch_size=batch_size,
-              epochs=epoch, verbose=2,
+              epochs=epoch, verbose=1,
               validation_split=0.2,
               callbacks=[es, mdckpt])
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.0001)
     parser.add_argument("--dropout", type=float, default=0.3)
-    parser.add_argument("--sample_rate", type=float, default=0.3)
+    parser.add_argument("--sample_rate", type=float, default=1.0)
     opt = parser.parse_args()
     log = Logger('./log/movielens_models.log', level='debug')
     main(opt, log)

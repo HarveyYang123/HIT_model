@@ -121,7 +121,7 @@ class DualTowerForTim(nn.Module):
         else:
             print(self.device)
 
-        train_loader = DataLoader(dataset=train_tensor_data, shuffle=shuffle, batch_size=batch_size)
+        train_loader = DataLoader(dataset=train_tensor_data, shuffle=shuffle, batch_size=batch_size, num_workers=4)
 
         sample_num = len(train_tensor_data)
         steps_per_epoch = (sample_num - 1) // batch_size + 1
@@ -140,6 +140,10 @@ class DualTowerForTim(nn.Module):
         # train
         print("Train on {0} samples, validate on {1} samples, {2} steps per epoch".format(
             len(train_tensor_data), len(val_y), steps_per_epoch))
+
+        # Creates once at the beginning of training
+        scaler = torch.cuda.amp.GradScaler()
+
         for epoch in range(initial_epoch, epochs):
             epoch_logs = {}
             start_time = time.time()
@@ -150,8 +154,9 @@ class DualTowerForTim(nn.Module):
 
             train_result = {}
 
-            with tqdm(enumerate(train_loader), disable=verbose != 1) as t:
-                for _, (x_train, y_train) in t:
+            with tqdm(enumerate(train_loader), disable=verbose != 1, unit="batch") as tepoch:
+                for _, (x_train, y_train) in tepoch:
+                    tepoch.set_description(f'Epoch {epoch}')
                     x = x_train.to(self.device).float()
                     y = y_train.to(self.device).float()
 
@@ -202,8 +207,16 @@ class DualTowerForTim(nn.Module):
                         non_target_generator_for_user_loss_epoch += loss_v_non_tar.item()
                         non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
 
-                    total_loss.backward()
-                    optim.step()
+                    # total_loss.backward()
+                    # # optim.step()
+                    # Scales the loss, and calls backward()
+                    # to create scaled gradients
+                    scaler.scale(total_loss).backward()
+                    # Unscales gradients and calls
+                    # or skips optimizer.step()
+                    scaler.step(optim)
+                    # Updates the scale for next iteration
+                    scaler.update()
 
                     if verbose > 0:
                         for name, metric_fun in self.metrics.items():
