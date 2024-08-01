@@ -209,9 +209,13 @@ class DualTowerForTim(nn.Module):
                         for name, metric_fun in self.metrics.items():
                             if name not in train_result:
                                 train_result[name] = []
-                            train_result[name].append(metric_fun(
-                                y.cpu().data.numpy(), y_pred.cpu().data.numpy().astype('float64')
-                            ))
+
+                            try:
+                                val = metric_fun(y.cpu().data.numpy(), y_pred.cpu().data.numpy().astype('float64'))
+                                train_result[name].append(val)
+                            except ValueError:
+                                print(f"name:{name}, val error")
+                                train_result[name].append(0.0)
 
             # add epoch_logs
             epoch_logs["total_loss"] = total_loss_epoch / sample_num
@@ -265,6 +269,7 @@ class DualTowerForTim(nn.Module):
         eval_result = {}
         for name, metric_fun in self.metrics.items():
             eval_result[name] = metric_fun(y, pred_ans)
+            print(f"name:{name}, eval_result[{name}]:{eval_result[name]}")
         return eval_result
 
     def predict(self, x, batch_size=256):
@@ -366,9 +371,6 @@ class DualTowerForTim(nn.Module):
 
     def add_auxiliary_loss(self, aux_loss, alpha):
         self.aux_loss = aux_loss * alpha
-
-
-
 
     def compile(self, optimizer, loss=None, metrics=None,lr = 0.01):
         self.metrics_names = ["loss"]

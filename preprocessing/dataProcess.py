@@ -287,11 +287,14 @@ class taobaoDataProcess():
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
 
+        user_sparse_features_recon = ['cms_segid', 'cms_group_id', 'final_gender_code', 'age_level',
+                                      'pvalue_level', 'shopping_level', 'occupation', 'new_user_class_level', ]
+        item_sparse_features_recon = ['cate_id', 'customer', 'brand', 'pid']
         self.user_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
-                                               for i, feat in enumerate(user_sparse_features)]
+                                               for i, feat in enumerate(user_sparse_features_recon)]
 
         self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
-                                               for i, feat in enumerate(item_sparse_features)]
+                                               for i, feat in enumerate(item_sparse_features_recon)]
 
         self.train_model_input = {name: self.train[name] for name in sparse_features + dense_features}
 
@@ -332,8 +335,9 @@ class taobaoDataProcess():
 
     def data_process(self, profile_path, ad_path, user_path):
         profile_data = pd.read_csv(profile_path)
-        if self.sample_rate < 0.9:
-            profile_data = profile_data.sample(frac=self.sample_rate, random_state=1)
+        # if self.sample_rate < 0.9:
+        #     profile_data = profile_data.sample(frac=self.sample_rate, random_state=1)
+        profile_data = profile_data.sample(frac=self.sample_rate, random_state=1).reset_index(drop=True)
 
         ad_data = pd.read_csv(ad_path)
         user_data = pd.read_csv(user_path)
