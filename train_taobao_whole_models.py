@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
     # parser.add_argument("--batch_size", type=int, default=2048)
-    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--lr", type=float, default=0.0001)
     parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--sample_rate", type=float, default=1.0)
