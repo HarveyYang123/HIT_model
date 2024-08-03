@@ -39,10 +39,10 @@ def main(args, log):
     device = 'cpu'
     if args.use_cuda and torch.cuda.is_available():
         log.logger.info('cuda ready...')
-        device = 'cuda:0'
+        device = 'cuda:1'
 
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
-                       patience=5, mode='max', baseline=None)
+                       patience=2, mode='max', baseline=None)
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
@@ -72,20 +72,21 @@ def main(args, log):
     log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
 
     # %%
-    pred_ts = model.predict(AmazonData.test_model_input, batch_size=2048)
+    pred_ts = model.predict(AmazonData.test_model_input, batch_size=128)
     log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
     log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
-    parser.add_argument("--model_name", type=str, default="dssm")
+    parser.add_argument("--model_name", type=str, default="tim")
     parser.add_argument("--data_path", type=str, default="./data/amazon_eletronics.csv")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/amazon")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
     parser.add_argument("--use_cuda", type=bool, default=True)
-    parser.add_argument("--batch_size", type=int, default=2048)
+    # parser.add_argument("--batch_size", type=int, default=2048)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--random_seed", type=int, default=1023)

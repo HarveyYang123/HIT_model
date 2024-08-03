@@ -49,7 +49,7 @@ def main(args, log):
     # mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
     #                          mode='max', verbose=1, save_best_only=True, save_weights_only=True)
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
-                       patience=5, mode='max')
+                       patience=2, mode='max')
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
@@ -90,12 +90,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kanTim"]
     parser.add_argument("--model_name", type=str, default="int_tower")
-    # parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
-    parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
+    parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
+    # parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
-    parser.add_argument("--batch_size", type=int, default=2048)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--random_seed", type=int, default=1023)

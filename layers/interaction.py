@@ -21,11 +21,10 @@ class FM(nn.Module):
 
 class ImplicitInteraction(nn.Module):
     def __init__(self, inputs_dim, hidden_units, activation='relu', l2_reg=0, dropout_rate=0, use_bn=False,
-                 init_std=0.0001, dice_dim=3, seed=1024, device='cpu'):
+                 init_std=0.0001, dice_dim=3, device='cpu'):
         super(ImplicitInteraction, self).__init__()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(dropout_rate)
-        self.seed = seed
         self.l2_reg = l2_reg
         self.use_bn = use_bn
         if len(hidden_units) == 0:
@@ -60,11 +59,12 @@ class ImplicitInteraction(nn.Module):
             if self.use_bn and fc.size()[0] > 1:
                 fc = self.bn[i](fc)
             fc = self.activation_layers[i](fc)
-
-            fc = self.dropout(fc)
+            if i != len(self.linears) - 1:
+                fc = self.dropout(fc)
+            # fc = self.dropout(fc)
             deep_input = fc
         # # l2 norm
-        # deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
+        deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
         return deep_input
 
 class LightSE(nn.Module):

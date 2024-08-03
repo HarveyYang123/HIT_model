@@ -42,7 +42,7 @@ def main(args, log):
         device = args.cuda_number
 
     es = EarlyStopping(monitor='val_auc', min_delta=0, verbose=1,
-                       patience=5, mode='max', baseline=None)
+                       patience=2, mode='max', baseline=None)
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
@@ -99,9 +99,9 @@ if __name__ == "__main__":
     parser.add_argument("--epoch", type=int, default=30)
     # parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--batch_size", type=int, default=256)
-    parser.add_argument("--lr", type=float, default=0.0001)
-    parser.add_argument("--dropout", type=float, default=0.3)
-    parser.add_argument("--sample_rate", type=float, default=1.0)
+    parser.add_argument("--lr", type=float, default=0.01)
+    parser.add_argument("--dropout", type=float, default=0.2)
+    parser.add_argument("--sample_rate", type=float, default=0.3)
     opt = parser.parse_args()
     log = Logger('./log/movielens_models.log', level='debug')
     main(opt, log)

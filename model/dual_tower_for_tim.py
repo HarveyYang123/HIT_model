@@ -208,7 +208,7 @@ class DualTowerForTim(nn.Module):
                         non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
 
                     # total_loss.backward()
-                    # # optim.step()
+                    # optim.step()
                     # Scales the loss, and calls backward()
                     # to create scaled gradients
                     scaler.scale(total_loss).backward()
