@@ -285,7 +285,7 @@ class DualTowerForTim(nn.Module):
             print(f"name:{name}, eval_result[{name}]:{eval_result[name]}")
         return eval_result
 
-    def predict(self, x, batch_size=256):
+    def predict(self, x, batch_size=256, keep_all = False):
         model = self.eval()
         if isinstance(x, dict):
             x = [x[feature] for feature in self.feature_index]
@@ -304,12 +304,23 @@ class DualTowerForTim(nn.Module):
         with torch.no_grad():
             for _, x_test in enumerate(test_loader):
                 x = x_test[0].to(self.device).float()
-
-                y_pred = model(x)[0].cpu().data.numpy()
-                # y_pred = model(x).cpu().data.numpy()
+                pred = model(x)
+                if keep_all:
+                    y_pred = [item.cpu().data.numpy() for item in pred]
+                else:
+                    y_pred = model(x)[0].cpu().data.numpy()
                 pred_ans.append(y_pred)
-
-        return np.concatenate(pred_ans).astype("float64")
+        if keep_all:
+            # batch_num x [batch_size * K]
+            output_num = len(pred_ans[-1])
+            output = [[] for _ in range(output_num)]
+            for idx in range(output_num):
+                for idy in range(len(pred_ans)):
+                    output[idx].append(pred_ans[idy][idx])
+                output[idx] = np.concatenate(output[idx], axis=0)
+            return output
+        else:
+            return np.concatenate(pred_ans).astype("float64")
 
     def input_from_feature_columns(self, X, feature_columns, embedding_dict, support_dense=True):
         sparse_feature_columns = list(
