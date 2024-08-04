@@ -62,7 +62,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                              user_input_for_recon=user_feature_columns_for_recon,
                              item_input_for_recon=item_feature_columns_for_recon, field_dim = 16,
                              task='binary', dnn_dropout=dropout, device=device, activation_for_recon='relu',
-                             hidden_units_for_recon=(32, 32), use_target=True, use_non_target=False)
+                             hidden_units_for_recon=(32, 32), use_target=True, use_non_target=True)
         elif data_name == "taobao":
             model = TimTower(user_feature_columns, item_feature_columns,
                              user_input_for_recon=user_feature_columns_for_recon,
