@@ -180,32 +180,17 @@ def col_score_2(user_rep, item_rep, user_fea_col, item_fea_col, embedding_dim):
 
 
 def fe_score(user_rep, item_rep, user_fea_col, item_fea_col, user_embedding_dim, item_embedding_dim):
-    # print(user_rep.shape)
-    # print(item_rep.shape)
-    # print("col_score")
     score = []
-    # user_embedding, item_embedding  = user_rep[0],item_rep[0]
-    # user_rep = torch.reshape(user_embedding, (-1, user_fea_col, user_embedding_dim[0]))
-    # item_rep = torch.reshape(item_embedding, (-1, item_fea_col, item_embedding_dim[0]))
-    #
-    # return (user_rep @ item_rep.permute(0, 2, 1)).max(2).values.sum(1)
-
-
     for i in range(len(user_embedding_dim)):
-        # print(user_rep[i].shape)
-        # print(item_rep[i].shape)
         user_temp = torch.reshape(user_rep[i], (-1, user_fea_col, user_embedding_dim[i]))
         item_temp = torch.reshape(item_rep[-1], (-1, item_fea_col, item_embedding_dim[i]))
         # print(user_temp.shape)
         # print(item_temp.shape)
         score.append((user_temp @ item_temp.permute(0, 2, 1)).max(2).values.sum(1))
-    # all_score = 0.4 * score[0] + 0.2*score[1] + 0.4*score[2]
-    # print(f"score:{score}")
+
+    user_temp = torch.reshape(user_rep[-1], (-1, user_fea_col, user_embedding_dim[-1]))
+    item_temp = torch.reshape(item_rep[-1], (-1, item_fea_col, item_embedding_dim[-1]))
+
     score = torch.stack(score).transpose(1, 0)
-    # print(torch.sum(score,1))
-    # all_score = all_score.unsqueeze(1)
-    # # print(all_score.shape)
-    # return all_score
-    # return torch.mean(score, 1)
     return torch.sum(score, 1)
 

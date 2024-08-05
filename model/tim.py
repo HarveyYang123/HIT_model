@@ -27,7 +27,7 @@ class TimTower(DualTowerForTim):
                  dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
                  item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
-                 use_target=True, use_non_target=True):
+                 use_target=True, use_non_target=True, only_output_fe=False):
         super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
@@ -42,6 +42,7 @@ class TimTower(DualTowerForTim):
         self.user_head = user_head
         self.item_head = item_head
         self.field_dim = field_dim
+        self.only_output_fe = only_output_fe
 
         self.dnn_hidden_units = dnn_hidden_units
         self.dnn_activation = dnn_activation
@@ -94,19 +95,20 @@ class TimTower(DualTowerForTim):
         if len(user_dnn_feature_columns) > 0:
             self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                           use_bn=dnn_use_bn, user_head=user_head, init_std=init_std, device=device)
-            self.user_dnn = DNN(input_user_dim, dnn_hidden_units,
-                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                use_bn=dnn_use_bn, init_std=init_std, device=device)
+                                           use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
+                                           use_kan=True, only_output_fe=self.only_output_fe, device=device)
+            # self.user_dnn = DNN(input_user_dim, dnn_hidden_units,
+            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.user_dnn_embedding = None
 
         if len(item_dnn_feature_columns) > 0:
             self.item_fe_dnn = Item_Fe_DNN(input_item_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                            use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
-            self.item_dnn = DNN(input_item_dim, dnn_hidden_units,
-                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                use_bn=dnn_use_bn, init_std=init_std, device=device)
+            # self.item_dnn = DNN(input_item_dim, dnn_hidden_units,
+            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.item_dnn_embedding = None
         # self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
         # self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
@@ -149,6 +151,7 @@ class TimTower(DualTowerForTim):
                 # non_target_recon_output_for_user_new = torch.nn.functional.normalize(non_target_recon_output_for_user_new, p=2,
                 #                                                                  dim=-1)
                 user_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_user_new, dim=1))
+
             # implicit interaction user end
 
             # user_sparse_embedding = torch.cat(user_sparse_embedding_list, dim=1)
@@ -166,8 +169,6 @@ class TimTower(DualTowerForTim):
 
             self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
-
-
 
         # item tower
         if len(self.item_dnn_feature_columns) > 0:
@@ -217,16 +218,17 @@ class TimTower(DualTowerForTim):
             self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
 
-
-
-
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
             # score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
             # output = self.out(score)
+            field_dim_len = len(self.dnn_hidden_units)
+            if self.only_output_fe:
+                field_dim_len = 1
 
             score = fe_score(self.user_fe_rep, self.item_fe_rep, self.user_head, self.item_head,
-                             [self.field_dim,self.field_dim,self.field_dim],
-                             [self.field_dim, self.field_dim,self.field_dim])
+                             [self.field_dim] * field_dim_len,
+                             [self.field_dim] * field_dim_len)
+
             output = self.out(score)
 
             return output, self.user_dnn_embedding, self.item_dnn_embedding, \

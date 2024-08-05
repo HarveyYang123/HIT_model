@@ -207,16 +207,14 @@ class DualTowerForTim(nn.Module):
                         non_target_generator_for_user_loss_epoch += loss_v_non_tar.item()
                         non_target_generator_for_item_loss_epoch += loss_u_non_tar.item()
 
-                    # total_loss.backward()
-                    # optim.step()
+                    total_loss.backward()
+                    optim.step()
+
                     # Scales the loss, and calls backward()
                     # to create scaled gradients
-                    scaler.scale(total_loss).backward()
-                    # Unscales gradients and calls
-                    # or skips optimizer.step()
-                    scaler.step(optim)
-                    # Updates the scale for next iteration
-                    scaler.update()
+                    # scaler.scale(total_loss).backward()
+                    # scaler.step(optim)
+                    # scaler.update()
 
                     if verbose > 0:
                         for name, metric_fun in self.metrics.items():
