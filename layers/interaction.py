@@ -59,12 +59,12 @@ class ImplicitInteraction(nn.Module):
             if self.use_bn and fc.size()[0] > 1:
                 fc = self.bn[i](fc)
             fc = self.activation_layers[i](fc)
-            if i != len(self.linears) - 1:
-                fc = self.dropout(fc)
-            # fc = self.dropout(fc)
+            # if i != len(self.linears) - 1:
+            #     fc = self.dropout(fc)
+            fc = self.dropout(fc)
             deep_input = fc
         # # l2 norm
-        # deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
+        deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
         return deep_input
 
 class LightSE(nn.Module):
