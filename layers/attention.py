@@ -40,7 +40,7 @@ class MultiHeadAttention(nn.Module):
         self.to(device)
 
     def forward(self, key, value, query, attn_mask=None):
-        residual = query
+        residual = value
 
         dim_per_head = self.dim_per_head
         num_heads = self.num_heads
