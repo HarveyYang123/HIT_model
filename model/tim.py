@@ -3,22 +3,24 @@
 
 
 """
+import torch
+import torch.nn as nn
 
 from model.base_tower import BaseTower
 from model.dual_tower_for_tim import DualTowerForTim
-from preprocessing.inputs import combined_dnn_input, compute_input_dim
+from layers.interaction import SENETLayer, ImplicitInteraction
 from layers.core import DNN
-import torch
+from layers.activation import activation_layer
+from layers.interaction import LightSE
+from layers.core import User_Fe_DNN,Item_Fe_DNN
+from layers.attention import MultiHeadAttention
+from preprocessing.utils import fe_score
 from preprocessing.utils import Cosine_Similarity
 from preprocessing.utils import col_score
 from preprocessing.utils import col_score_2
 from preprocessing.utils import single_score
-from layers.interaction import SENETLayer, ImplicitInteraction
-import torch.nn as nn
-from layers.activation import activation_layer
-from layers.interaction import LightSE
-from preprocessing.utils import fe_score
-from layers.core import User_Fe_DNN,Item_Fe_DNN
+from preprocessing.inputs import combined_dnn_input, compute_input_dim
+
 
 
 class TimTower(DualTowerForTim):
@@ -27,7 +29,7 @@ class TimTower(DualTowerForTim):
                  dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
                  item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
-                 use_target=True, use_non_target=True, only_output_fe=False):
+                 use_target=True, use_non_target=True, only_output_fe=True, use_mha=False):
         super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
@@ -36,6 +38,7 @@ class TimTower(DualTowerForTim):
         self.user_dnn_feature_columns = user_dnn_feature_columns
         self.user_input_for_recon = user_input_for_recon
         self.item_input_for_recon = item_input_for_recon
+        self.use_mha = use_mha
         print("self.user_input_for_recon: ", self.user_input_for_recon)
         print("self.item_input_for_recon: ", self.item_input_for_recon)
 
@@ -82,6 +85,8 @@ class TimTower(DualTowerForTim):
                                                          activation=self.activation_for_recon, device=self.device)
             input_user_dim += self.hidden_units_for_recon[-1]
             input_item_dim += self.hidden_units_for_recon[-1]
+
+
         if self.use_non_target:
             self.non_target_recon_user = ImplicitInteraction(compute_input_dim(user_input_for_recon),
                                                              self.hidden_units_for_recon,
@@ -93,22 +98,38 @@ class TimTower(DualTowerForTim):
             input_item_dim += self.hidden_units_for_recon[-1]
 
         if len(user_dnn_feature_columns) > 0:
-            self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
-                                           activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                           use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
-                                           use_kan=True, only_output_fe=self.only_output_fe, device=device)
-            # self.user_dnn = DNN(input_user_dim, dnn_hidden_units,
-            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
+            if self.use_mha:
+                self.user_dnn = DNN(input_user_dim, hidden_units=[200],
+                                    activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                    use_bn=dnn_use_bn, init_std=init_std, device=device)
+                self.user_mha = MultiHeadAttention(model_dim=200, num_heads=8, dropout=self.dnn_dropout, device=device)
+                self.user_fe_dnn = User_Fe_DNN(200, field_dim, dnn_hidden_units,
+                                               activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                               use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
+                                               use_kan=False, only_output_fe=self.only_output_fe, device=device)
+            else:
+                self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
+                                               activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                               use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
+                                               use_kan=False, only_output_fe=self.only_output_fe, device=device)
+
             self.user_dnn_embedding = None
 
         if len(item_dnn_feature_columns) > 0:
-            self.item_fe_dnn = Item_Fe_DNN(input_item_dim, field_dim, dnn_hidden_units,
-                                           activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                           use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
-            # self.item_dnn = DNN(input_item_dim, dnn_hidden_units,
-            #                     activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-            #                     use_bn=dnn_use_bn, init_std=init_std, device=device)
+            if self.use_mha:
+                self.item_dnn = DNN(input_item_dim, hidden_units=[200],
+                                    activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                    use_bn=dnn_use_bn, init_std=init_std, device=device)
+                self.item_mha = MultiHeadAttention(model_dim=200, num_heads=8, dropout=self.dnn_dropout, device=device)
+                self.item_fe_dnn = Item_Fe_DNN(200, field_dim, dnn_hidden_units,
+                                               activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                               use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
+
+            else:
+                self.item_fe_dnn = Item_Fe_DNN(input_item_dim, field_dim, dnn_hidden_units,
+                                               activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
+                                               use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
+
             self.item_dnn_embedding = None
         # self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
         # self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
@@ -144,6 +165,7 @@ class TimTower(DualTowerForTim):
                 target_recon_output_for_user_new = target_recon_output_for_user.detach()
                 # target_recon_output_for_user_new = torch.nn.functional.normalize(target_recon_output_for_user_new, p=2, dim=-1)
                 user_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_user_new, dim=1))
+
             if self.use_non_target:
                 non_target_recon_output_for_user = self.non_target_recon_user(target_recon_user_fc)
 
@@ -165,9 +187,13 @@ class TimTower(DualTowerForTim):
 
 
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
-            # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
+            if self.use_mha:
+                user_dnn_embed = self.user_dnn(user_dnn_input)
+                user_mha_output, _ = self.user_mha(key=user_dnn_embed, value=user_dnn_embed, query=user_dnn_embed)
+                self.user_fe_rep = self.user_fe_dnn(user_mha_output)
+            else:
+                self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
 
-            self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
 
         # item tower
@@ -195,6 +221,7 @@ class TimTower(DualTowerForTim):
                 #     target_recon_output_for_item_new, p=2,
                 #     dim=-1)
                 item_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_item_new, dim=1))
+
             if self.use_non_target:
                 non_target_recon_output_for_item = self.non_target_recon_item(target_recon_item_fc)
 
@@ -203,9 +230,8 @@ class TimTower(DualTowerForTim):
                 #     non_target_recon_output_for_item_new, p=2,
                 #     dim=-1)
                 item_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_item_new, dim=1))
+
             # implicit interaction user end
-
-
             # item_sparse_embedding = torch.cat(item_sparse_embedding_list, dim=1)
             # Item_sim_embedding = self.Item_sim_non_local(item_sparse_embedding)
             # sparse_dnn_input = torch.flatten(Item_sim_embedding, start_dim=1)
@@ -215,7 +241,14 @@ class TimTower(DualTowerForTim):
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
 
-            self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
+            if self.use_mha:
+                item_dnn_embed = self.item_dnn(item_dnn_input)
+                item_mha_output, _ = self.item_mha(key=item_dnn_embed, value=item_dnn_embed, query=item_dnn_embed)
+                self.item_fe_rep = self.item_fe_dnn(item_mha_output)
+            else:
+                self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
+
+
             self.item_dnn_embedding = self.item_fe_rep[-1]
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
