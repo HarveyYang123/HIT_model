@@ -22,7 +22,6 @@ from preprocessing.utils import single_score
 from preprocessing.inputs import combined_dnn_input, compute_input_dim
 
 
-
 class TimTower(DualTowerForTim):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
                  gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
@@ -142,13 +141,6 @@ class TimTower(DualTowerForTim):
                                                use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
 
             self.item_dnn_embedding = None
-        # self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
-        # self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
-
-        # self.dense = torch.nn.Linear(128*len(self.user_dnn_feature_columns),1).cuda()
-        #
-        # self.user_col_dense = torch.nn.Linear(128, 128*len(self.user_dnn_feature_columns)).cuda()
-        # self.item_col_dense = torch.nn.Linear(128, 128*len(self.item_dnn_feature_columns)).cuda()
 
     def forward(self, inputs):
         # user tower
@@ -162,8 +154,6 @@ class TimTower(DualTowerForTim):
             if torch.cuda.is_available():
                 target_recon_output_for_user = target_recon_output_for_user.cuda()
                 non_target_recon_output_for_user = non_target_recon_output_for_user.cuda()
-            # print(user_sparse_embedding_list,len(user_sparse_embedding_list))
-            # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
             # implicit interaction user start
             user_sparse_embedding_list_for_recon, user_dense_value_list_for_recon = \
@@ -189,16 +179,6 @@ class TimTower(DualTowerForTim):
                 user_query_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_user_new, dim=1))
 
                 # implicit interaction user end
-
-            # user_sparse_embedding = torch.cat(user_sparse_embedding_list, dim=1)
-            # User_sim_embedding = self.User_sim_non_local(user_sparse_embedding)
-            # sparse_dnn_input = torch.flatten(User_sim_embedding, start_dim=1)
-            # if(len(user_dense_value_list)>0):
-            #     dense_dnn_input = torch.flatten(torch.cat(user_dense_value_list, dim=-1), start_dim=1)
-            #     user_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input],axis=-1)
-            # else:
-            #     user_dnn_input = sparse_dnn_input
-
 
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             if (self.use_non_target or self.use_target) and self.use_mha:
@@ -251,13 +231,6 @@ class TimTower(DualTowerForTim):
                 item_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_item_new, dim=1))
                 item_query_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_item_new, dim=1))
 
-            # implicit interaction user end
-            # item_sparse_embedding = torch.cat(item_sparse_embedding_list, dim=1)
-            # Item_sim_embedding = self.Item_sim_non_local(item_sparse_embedding)
-            # sparse_dnn_input = torch.flatten(Item_sim_embedding, start_dim=1)
-            # dense_dnn_input = torch.flatten(torch.cat(item_dense_value_list, dim=-1), start_dim=1)
-            # item_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)
-
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
 
@@ -270,7 +243,6 @@ class TimTower(DualTowerForTim):
                 self.item_fe_rep = self.item_fe_dnn(item_mha_output)
             else:
                 self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
-
 
             self.item_dnn_embedding = self.item_fe_rep[-1]
 

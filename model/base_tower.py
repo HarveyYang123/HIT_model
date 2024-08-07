@@ -161,9 +161,6 @@ class BaseTower(nn.Module):
                     # self.writer.add_graph(model, x)
 
                     y_pred,user_embedding,item_embedding = out[0],out[1],out[2]
-
-
-
                     # contras = contrast_loss(y_contras, user_embedding, item_embedding)
 
                     y_pred = y_pred.squeeze()
@@ -180,9 +177,6 @@ class BaseTower(nn.Module):
 
                     loss_epoch += loss.item()
                     total_loss_epoch += total_loss.item()
-
-
-
                     total_loss.backward()
                     optim.step()
 
@@ -369,9 +363,6 @@ class BaseTower(nn.Module):
     def add_auxiliary_loss(self, aux_loss, alpha):
         self.aux_loss = aux_loss * alpha
 
-
-
-
     def compile(self, optimizer, loss=None, metrics=None,lr = 0.01):
         self.metrics_names = ["loss"]
         self.optim = self._get_optim(optimizer,lr)
@@ -450,13 +441,3 @@ class BaseTower(nn.Module):
         if len(embedding_size_set) > 1:
             raise ValueError("embedding_dim of SparseFeat and VarlenSparseFeat must be same in this model!")
         return list(embedding_size_set)[0]
-
-
-
-
-
-
-
-
-
-

@@ -60,18 +60,17 @@ class PolyEncoder(BaseTower):
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
             user_embed = self.user_dnn(user_dnn_input)
-            self.user_mha_output, _ = self.user_mha(key=user_embed, value=user_embed, query=user_embed)
+            self.user_dnn_embedding , _ = self.user_mha(key=user_embed, value=user_embed, query=user_embed)
 
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
                 self.input_from_feature_columns(inputs, self.item_dnn_feature_columns, self.item_embedding_dict)
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
-
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
+            # self.user_dnn_embedding = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_dnn_embedding,
+            #                                                     v=self.user_dnn_embedding)
 
-            self.user_dnn_embedding = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_mha_output,
-                                                     v=self.user_mha_output)
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
             score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
             output = self.out(score)
