@@ -1,3 +1,4 @@
+test
 # Description
 - Problem solved: We propose a Hybrid Interaction Two-Tower (HIT) model for the pre-ranking system. Without compromising computational efficiency, the extensive two-tower interaction significantly improves the calculation performance.
 - Module details: In the two-tower model, we propose a hybrid interaction method that combines early-interaction and late-interaction, which are implemented through a generator and a Multi-Head Representer, respectively. The generator achieves early-interaction by generating high-dimensional embeddings for users or ads. The Multi-Head Representer implements late-interaction by mapping user or ad embeddings to multiple different dimensional heads, and calculating similarity between different heads.
