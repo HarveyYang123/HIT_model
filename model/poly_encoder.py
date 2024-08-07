@@ -4,14 +4,16 @@
 
 from model.base_tower import BaseTower
 from preprocessing.inputs import combined_dnn_input, compute_input_dim
-from layers.core import DNN
+
 import torch
+import torch.nn as nn
 from preprocessing.utils import Cosine_Similarity
 from preprocessing.utils import col_score
 from preprocessing.utils import col_score_2
 from preprocessing.utils import single_score
 from layers.interaction import SENETLayer
 from layers.attention import MultiHeadAttention, target_dot_attention
+from layers.core import DNN
 
 class PolyEncoder(BaseTower):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
@@ -28,6 +30,7 @@ class PolyEncoder(BaseTower):
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.user_mha = MultiHeadAttention(model_dim=dnn_hidden_units[-1], num_heads=8,
                                                dropout=dnn_dropout, device=device)
+            self.layer_norm = nn.LayerNorm(dnn_hidden_units[-1])
 
             self.user_dnn_embedding = None
 
@@ -68,8 +71,9 @@ class PolyEncoder(BaseTower):
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
-            # self.user_dnn_embedding = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_dnn_embedding,
-            #                                                     v=self.user_dnn_embedding)
+            target_embed = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_dnn_embedding,
+                                                                v=self.user_dnn_embedding)
+            self.user_dnn_embedding = self.layer_norm(self.user_dnn_embedding + target_embed)
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
             score = Cosine_Similarity(self.user_dnn_embedding, self.item_dnn_embedding, gamma=self.gamma)
