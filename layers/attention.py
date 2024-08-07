@@ -65,3 +65,34 @@ class MultiHeadAttention(nn.Module):
 
         return output, attention
 
+def target_dot_attention(q, k, v, v_mask=None, dropout=None):
+    attention_weights = torch.matmul(q, k.transpose(-1, -2))
+    if v_mask is not None:
+        extended_v_mask = (1.0 - v_mask.unsqueeze(1)) * -100000.0
+        attention_weights += extended_v_mask
+
+    attention_weights = nn.softmax(attention_weights, -1)
+    if dropout is not None:
+        attention_weights = dropout(attention_weights)
+
+    output = torch.matmul(attention_weights, v)
+    return output
+
+class target_dot_attention(nn.Module):
+    def __init__(self, attention_dropout=0.0, device='cpu'):
+        super(target_dot_attention, self).__init__()
+        self.dropout = nn.Dropout(attention_dropout)
+        self.softmax = nn.Softmax(dim=1)
+        self.to(device)
+    def forward(self, q, k, v, v_mask=None, dropout=None):
+        attention_weights = torch.matmul(q, k.transpose(-1, -2))
+        if v_mask is not None:
+            extended_v_mask = (1.0 - v_mask.unsqueeze(1)) * -100000.0
+            attention_weights += extended_v_mask
+
+        attention_weights =self.softmax(attention_weights)
+        if dropout is not None:
+            attention_weights = self.dropout(attention_weights)
+
+        output = torch.matmul(attention_weights, v)
+        return output
