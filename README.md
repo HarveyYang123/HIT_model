@@ -9,7 +9,7 @@ python train_amazon_whole_models.py --model_name tim
 python train_taobao_whole_models.py --model_name tim 
 python train_movielens_whole_models.py --model_name tim  
 ```
-## Source code of Paper "IntTower: the Next Generation of  Two-Tower Model for Pre-ranking System" 
+## Source code of Paper "HIT: the Next Generation of  Two-Tower Model" 
 ![avatar](./figure/model.png)
 # Contents
 - [Contents](#contents)
