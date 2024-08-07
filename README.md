@@ -10,7 +10,7 @@ python train_taobao_whole_models.py --model_name tim
 python train_movielens_whole_models.py --model_name tim  
 ```
 ## Source code of Paper "IntTower: the Next Generation of  Two-Tower Model for Pre-ranking System" 
-![avatar](./figure/model.PNG)
+![avatar](./figure/model.png)
 # Contents
 - [Contents](#contents)
 - [IntTower Description](#IntTower-description)
