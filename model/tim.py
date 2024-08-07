@@ -114,12 +114,12 @@ class TimTower(DualTowerForTim):
                 self.user_fe_dnn = User_Fe_DNN(200, field_dim, dnn_hidden_units,
                                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                                use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
-                                               use_kan=False, only_output_fe=self.only_output_fe, device=device)
+                                               use_kan=True, only_output_fe=self.only_output_fe, device=device)
             else:
                 self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
                                                activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                                use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
-                                               use_kan=False, only_output_fe=self.only_output_fe, device=device)
+                                               use_kan=True, only_output_fe=self.only_output_fe, device=device)
 
             self.user_dnn_embedding = None
 

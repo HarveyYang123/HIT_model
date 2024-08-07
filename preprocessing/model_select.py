@@ -8,6 +8,7 @@ from model.cold import Cold
 from model.autoint import AutoInt
 from model.wdm import WideDeep
 from model.tim import TimTower
+from model.poly_encoder import PolyEncoder
 from model.KAN_TimTower import KanTimTower
 
 
@@ -31,6 +32,10 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
     elif model_name == "dssm":
         log.logger.info("model_name dssm")
         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
+    elif model_name == "poly_encoder":
+        log.logger.info("model_name poly_encoder")
+        model = PolyEncoder(user_feature_columns, item_feature_columns, dnn_dropout=dropout,
+                            task='binary', device=device)
     elif model_name == "dat":
         log.logger.info("model_name dat")
         model = DAT(user_feature_columns, item_feature_columns, task='binary', dnn_dropout=dropout,

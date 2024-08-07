@@ -17,6 +17,7 @@ from preprocessing.utils import slice_arrays
 from tensorflow.python.keras.callbacks import CallbackList
 from preprocessing.callbacks import History
 from preprocessing.utils import contrast_loss
+# from preprocessing.utils import generation_cosine_loss_v2 as generation_cosine_loss
 from preprocessing.utils import generation_cosine_loss
 
 

@@ -73,7 +73,41 @@ def generation_loss(y, user_embedding, item_embedding, user_generator_vector, it
         loss_v = torch.mean(torch.pow((1 - y) * item_generator_vector + y * user_embedding_new - user_embedding_new, 2))
     return loss_u,loss_v
 
-def generation_cosine_loss(y, user_embedding, item_embedding, user_generator_vector, item_generator_vector, target=True):
+def criterion_cosine_loss(x1, x2, target, reduction='mean'):
+    scores = torch.cosine_similarity(x1, x2)
+    if target:
+        scores = 1 - scores
+    else:
+        scores = 1 + scores
+        # scores = 1 + torch.clamp(scores, min=0)
+
+    if reduction == 'mean':
+        return scores.mean()
+    elif reduction == 'sum':
+        return scores.sum()
+def generation_cosine_loss_v2(y, user_embedding, item_embedding, user_generator_vector, item_generator_vector,
+                           target=True, reduction='mean'):
+    # stop gradient
+    user_embedding_new = user_embedding.detach()
+    item_embedding_new = item_embedding.detach()
+
+    # normalize the embeddings to have unit length
+    user_norm = torch.nn.functional.normalize(user_embedding_new, p=2, dim=1)
+    item_norm = torch.nn.functional.normalize(item_embedding_new, p=2, dim=1)
+
+    # # normalize the generator vectors  - done in class "ImplicitInteraction"
+    user_gen_norm = torch.nn.functional.normalize(user_generator_vector, p=2, dim=1)
+    item_gen_norm = torch.nn.functional.normalize(item_generator_vector, p=2, dim=1)
+    # user_gen_norm = user_generator_vector
+    # item_gen_norm = item_generator_vector
+
+    # convert cosine similarity to loss
+    loss_u = criterion_cosine_loss(user_gen_norm, item_norm, target)
+    loss_v = criterion_cosine_loss(item_gen_norm, user_norm, target)
+    return loss_u, loss_v
+
+def generation_cosine_loss(y, user_embedding, item_embedding, user_generator_vector, item_generator_vector,
+                           target=True):
     # stop gradient
     user_embedding_new = user_embedding.detach()
     item_embedding_new = item_embedding.detach()

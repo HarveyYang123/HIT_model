@@ -70,14 +70,10 @@ def main(args, log):
               validation_split=0.2,
               callbacks=[es, mdckpt])
 
-    # 开始模型评估
     model.load_state_dict(torch.load(ckpt_path))
     model.eval()
 
-
-    # %%
-    # 6.Evaluate
-    # 看下最佳模型在完整的训练集上的表现
+    # Evaluate
     eval_tr = model.evaluate(movieData.train_model_input, movieData.train[movieData.target].values)
     log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
 
@@ -88,8 +84,8 @@ def main(args, log):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kanTim"]
-    parser.add_argument("--model_name", type=str, default="tim")
+    # ["int_tower", "dssm", "poly_encoder", "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kanTim"]
+    parser.add_argument("--model_name", type=str, default="poly_encoder")
     parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
     # parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/movie")
