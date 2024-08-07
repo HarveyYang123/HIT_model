@@ -74,8 +74,9 @@ class MVKE(BaseTower):
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
-            self.user_dnn_embedding = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_dnn_embedding,
+            target_embed = self.target_dot_attention(q=self.item_dnn_embedding, k=self.user_dnn_embedding,
                                                                 v=self.user_dnn_embedding)
+            self.user_dnn_embedding = self.user_dnn_embedding + target_embed
 
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:
