@@ -19,23 +19,24 @@ from layers.attention import target_dot_attention
 class MVKE(BaseTower):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, gamma=1, dnn_use_bn=True,
                  dnn_hidden_units=[300, 300, 128], dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
-                 dnn_dropout = 0, init_std=0.0001, seed=124, batch_size = 128, task='binary', device='cpu', gpus=None):
+                 dnn_dropout = 0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None):
         super(MVKE, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                     l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                     device=device, gpus=gpus)
 
         self.target_dot_attention = target_dot_attention(attention_dropout=dnn_dropout, device=device)
         self.towers_hidden = 64
-        self.tasks = 4
+        self.tasks = 2
+        self.dnn_hidden_units = dnn_hidden_units
         if len(user_dnn_feature_columns) > 0:
             self.user_dnn = DNN(compute_input_dim(user_dnn_feature_columns), dnn_hidden_units,
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
-            self.mmoe = MMOE_ExpertAttention(input_size=dnn_hidden_units[-1], num_experts=6, experts_out=16, experts_hidden=32,
-                             towers_hidden=self.towers_hidden, tasks=self.tasks, dnn_dropout=dnn_dropout,device=device)
+            self.mmoe_att = MMOE_ExpertAttention(input_size=dnn_hidden_units[-1], num_experts=6,
+                                                 towers_hidden=self.towers_hidden, tasks=self.tasks,
+                                                 dnn_dropout=dnn_dropout, device=device)
 
-            self.virtualKernel = nn.Parameter(torch.randn(batch_size, dnn_hidden_units[-1]))
-
+            self.virtualKernel = nn.Parameter(torch.randn(dnn_hidden_units[-1]), requires_grad=True).to(device)
             self.user_dnn_2 = DNN(self.towers_hidden * self.tasks, [dnn_hidden_units[-1]],
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
@@ -68,10 +69,10 @@ class MVKE(BaseTower):
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             user_embedding = self.user_dnn(user_dnn_input)
 
-            user_mmoe_embedding = self.mmoe(user_embedding, self.virtualKernel)
+            self.virtualKernelExp = self.virtualKernel.t().unsqueeze(0).expand(user_embedding.size()[0], -1)
+            user_mmoe_embedding = self.mmoe_att(user_embedding, self.virtualKernelExp)
             user_mmoe_embedding = torch.flatten(torch.cat(user_mmoe_embedding, dim=-1), start_dim=1)
-            self.user_dnn_embedding = self.user_dnn_2(user_mmoe_embedding)
-
+            self.user_dnn_embedding = self.user_dnn_2(user_mmoe_embedding) + user_embedding
 
         if len(self.item_dnn_feature_columns) > 0:
             item_sparse_embedding_list, item_dense_value_list = \
@@ -79,7 +80,7 @@ class MVKE(BaseTower):
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             self.item_dnn_embedding = self.item_dnn(item_dnn_input)
-            target_embed = self.target_dot_attention(q=self.item_dnn_embedding, k=self.virtualKernel,
+            target_embed = self.target_dot_attention(q=self.item_dnn_embedding, k=self.virtualKernelExp,
                                                                 v=self.user_dnn_embedding)
             self.user_dnn_embedding = self.user_dnn_embedding + target_embed
 

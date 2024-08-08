@@ -63,21 +63,17 @@ class MMOE(nn.Module):
 
 
 class MMOE_ExpertAttention(nn.Module):
-    def __init__(self, input_size, num_experts, experts_out, experts_hidden, towers_hidden, tasks,
+    def __init__(self, input_size, num_experts, towers_hidden, tasks,
                  dnn_dropout, device='cpu'):
         super(MMOE_ExpertAttention, self).__init__()
         self.input_size = input_size
         self.num_experts = num_experts
-        self.experts_out = experts_out
-        self.experts_hidden = experts_hidden
         self.towers_hidden = towers_hidden
         self.tasks = tasks
 
         self.softmax = nn.Softmax(dim=1)
-        # self.experts = nn.ModuleList(
-        #     [Expert(self.input_size, self.experts_out, self.experts_hidden) for i in range(self.num_experts)])
 
-        self.experts = nn.ModuleList([target_dot_attention(attention_dropout=dnn_dropout, device=device)for i in range(self.num_experts)])
+        self.experts = nn.ModuleList([target_dot_attention(attention_dropout=dnn_dropout, device=device) for i in range(self.num_experts)])
         self.w_gates = nn.ParameterList([nn.Parameter(torch.randn(input_size, num_experts), requires_grad=True) for i in range(self.tasks)])
         self.towers = nn.ModuleList([Tower(input_size, self.towers_hidden, self.towers_hidden) for i in range(self.tasks)])
         self.to(device)
@@ -89,10 +85,17 @@ class MMOE_ExpertAttention(nn.Module):
         gates_o = [self.softmax(x @ g) for g in self.w_gates]
 
         tower_input = [g.t().unsqueeze(2).expand(-1, -1, self.input_size) * experts_o_tensor for g in gates_o]
-        tower_input = [torch.sum(ti, dim=0) for ti in tower_input]
+        # tower_input = []
+        # for g in gates_o:
+        #     _g = g.t().unsqueeze(2).expand(-1, -1, self.input_size)
+        #     try:
+        #         tower_input.append(_g * experts_o_tensor)
+        #         # print(f"g size:{g.size()} ; _g size:{_g.size()} ; experts_o_tensor size:{experts_o_tensor.size()}")
+        #     except:
+        #         print(f"g size:{g.size()} ; _g size:{_g.size()} ; experts_o_tensor size:{experts_o_tensor.size()}")
+        #     # tower_input.append(_g * experts_o_tensor)
 
+        tower_input = [torch.sum(ti, dim=0) for ti in tower_input]
         final_output = [t(ti) for t, ti in zip(self.towers, tower_input)]
         return final_output
 
-
-# MMOE(input_size=499, num_experts=6, experts_out=16, experts_hidden=32, towers_hidden=8, tasks=2)

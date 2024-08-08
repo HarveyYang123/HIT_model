@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # parser.add_argument("--profile_path", type=str, default="./data/Alibaba/raw_sample_test.csv")
     # parser.add_argument("--ad_path", type=str, default="./data/Alibaba/ad_feature.csv")
     # parser.add_argument("--user_path", type=str, default="./data/Alibaba/user_profile.csv")
-    parser.add_argument("--ckpt_fold", type=str, default="./checkpoints")
+    parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/taobao")
     parser.add_argument("--use_cuda", type=bool, default=True)
     parser.add_argument("--cuda_number", type=str, default="cuda:1")
     parser.add_argument("--embedding_dim", type=int, default=32)
@@ -103,6 +103,6 @@ if __name__ == "__main__":
     parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--sample_rate", type=float, default=0.3)
     opt = parser.parse_args()
-    log = Logger('./log/movielens_models.log', level='debug')
+    log = Logger('./log/taobao_data.log', level='debug')
     main(opt, log)
 
