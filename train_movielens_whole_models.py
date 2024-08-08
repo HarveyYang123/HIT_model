@@ -85,7 +85,7 @@ def main(args, log):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # ["int_tower", "dssm", "poly_encoder", "MVKE", "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kanTim"]
-    parser.add_argument("--model_name", type=str, default="poly_encoder")
+    parser.add_argument("--model_name", type=str, default="MVKE")
     parser.add_argument("--data_path", type=str, default="./data/movielens.txt")
     # parser.add_argument("--data_path", type=str, default="./data/movielens_test.txt")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/movie")
@@ -98,7 +98,5 @@ if __name__ == "__main__":
     opt = parser.parse_args()
     log = Logger('./log/movielens_models.log', level='debug')
     main(opt, log)
-    # branch_test
-    # branch_test123
-    # test_updata
+
 

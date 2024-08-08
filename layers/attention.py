@@ -85,6 +85,7 @@ class target_dot_attention(nn.Module):
         self.softmax = nn.Softmax(dim=1)
         self.to(device)
     def forward(self, q, k, v, v_mask=None, dropout=None):
+        # print(f"q size:{q.size()} \n k size:{k.size()} \n v size:{v.size()}")
         attention_weights = torch.matmul(q, k.transpose(-1, -2))
         if v_mask is not None:
             extended_v_mask = (1.0 - v_mask.unsqueeze(1)) * -100000.0
