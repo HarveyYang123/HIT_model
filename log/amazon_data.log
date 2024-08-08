@@ -1,0 +1,2 @@
+2024-08-08 19:08:49,243 - D:\github\TIM_model\train_amazon_whole_models.py[line:34] - INFO: 文件夹'./checkpoints/amazon'已存在。
+2024-08-08 19:08:54,096 - D:\github\TIM_model\preprocessing\model_select.py[line:68] - INFO: model_name hit

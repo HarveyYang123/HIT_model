@@ -86,7 +86,6 @@ if __name__ == "__main__":
     parser.add_argument("--cuda_number", type=str, default="cuda:1")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
-    parser.add_argument("--use_cuda", type=bool, default=True)
     # parser.add_argument("--batch_size", type=int, default=2048)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.001)
