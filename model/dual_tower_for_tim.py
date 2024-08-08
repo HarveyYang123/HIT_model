@@ -122,7 +122,8 @@ class DualTowerForTim(nn.Module):
         else:
             print(self.device)
 
-        train_loader = DataLoader(dataset=train_tensor_data, shuffle=shuffle, batch_size=batch_size, num_workers=4)
+        # train_loader = DataLoader(dataset=train_tensor_data, shuffle=shuffle, batch_size=batch_size, num_workers=4)
+        train_loader = DataLoader(dataset=train_tensor_data, shuffle=shuffle, batch_size=batch_size)
 
         sample_num = len(train_tensor_data)
         steps_per_epoch = (sample_num - 1) // batch_size + 1

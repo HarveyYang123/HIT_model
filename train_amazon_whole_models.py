@@ -78,8 +78,8 @@ def main(args, log):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim"]
-    parser.add_argument("--model_name", type=str, default="tim")
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "hit"]
+    parser.add_argument("--model_name", type=str, default="hit")
     parser.add_argument("--data_path", type=str, default="./data/amazon_eletronics.csv")
     parser.add_argument("--ckpt_fold", type=str, default="./checkpoints/amazon")
     parser.add_argument("--use_cuda", type=bool, default=True)

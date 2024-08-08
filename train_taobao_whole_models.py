@@ -83,8 +83,8 @@ def main(args, log):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "tim", "kan_Tim"]
-    parser.add_argument("--model_name", type=str, default="tim")
+    # ["int_tower", "dssm",  "dat", "deep_fm", "dcn", "cold", "auto_int", "wide_and_deep", "hit", "kan_Tim"]
+    parser.add_argument("--model_name", type=str, default="hit")
     parser.add_argument("--profile_path", type=str, default="/data/workPlace/recall_model/data/Alibaba/raw_sample.csv")
     parser.add_argument("--ad_path", type=str, default="/data/workPlace/recall_model/data/Alibaba/ad_feature.csv")
     parser.add_argument("--user_path", type=str, default="/data/workPlace/recall_model/data/Alibaba/user_profile.csv")

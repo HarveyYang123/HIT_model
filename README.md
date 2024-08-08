@@ -5,9 +5,9 @@
 ## Easy to use
 ``` shell
 pip install -r requirements.txt
-python train_amazon_whole_models.py --model_name tim
-python train_taobao_whole_models.py --model_name tim 
-python train_movielens_whole_models.py --model_name tim  
+python train_amazon_whole_models.py --model_name hit
+python train_taobao_whole_models.py --model_name hit 
+python train_movielens_whole_models.py --model_name hit  
 ```
 ## Source code of Paper "HIT: the Next Generation of  Two-Tower Model" 
 ![avatar](./figure/model.png)

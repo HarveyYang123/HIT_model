@@ -22,14 +22,14 @@ from preprocessing.utils import single_score
 from preprocessing.inputs import combined_dnn_input, compute_input_dim
 
 
-class TimTower(DualTowerForTim):
+class HitTower(DualTowerForTim):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
                  gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
                  dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
                  item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
                  use_target=True, use_non_target=True, only_output_fe=True, use_mha=True):
-        super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
+        super(HitTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
 
@@ -186,7 +186,7 @@ class TimTower(DualTowerForTim):
                 query_embed = torch.flatten(torch.cat(user_query_embedding_list, dim=-1), start_dim=1)
                 user_query = self.user_query_dnn(query_embed)
                 user_mha_output, _ = self.user_mha(key=user_dnn_embed, value=user_dnn_embed, query=user_query)
-                self.user_fe_rep = self.user_fe_dnn(user_mha_output)
+                self.user_fe_rep = self.user_fe_dnn(user_mha_output + user_dnn_embed)
             else:
                 self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
 
