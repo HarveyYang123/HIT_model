@@ -109,6 +109,41 @@ class LightSE(nn.Module):
         return inputs + out
 
 
+
+# class SEBlock1D(nn.Module):
+#     def __init__(self, in_channels, reduction_ratio=16):
+#         super(SEBlock1D, self).__init__()
+#         self.squeeze = nn.AdaptiveAvgPool1d(1)
+#         self.excitation = nn.Sequential(
+#             nn.Linear(in_channels, in_channels // reduction_ratio),
+#             nn.ReLU(inplace=True),
+#             nn.Linear(in_channels // reduction_ratio, in_channels),
+#             nn.Sigmoid()
+#         )
+#
+#     def forward(self, x):
+#         # x shape: [batch_size, in_channels, length]
+#         b, c, _ = x.size()
+#         y = self.squeeze(x).view(b, c)
+#         y = self.excitation(y).view(b, c, 1)
+#         return x * y.expand_as(x)
+class SE_Block(nn.Module):
+    def __init__(self, num_features, reduction_ratio=16, seed=1024, device='cpu'):
+        super(SE_Block, self).__init__()
+        self.seed = seed
+        self.excitation = nn.Sequential(
+            nn.Linear(num_features, num_features // reduction_ratio),
+            nn.ReLU(inplace=True),
+            nn.Linear(num_features // reduction_ratio, num_features),
+            nn.Sigmoid()
+        )
+        self.to(device)
+    def forward(self, x):
+        # x shape: [batch_size, num_features]
+        b, c = x.size()
+        y = self.excitation(x)
+        return x * y
+
 class SENETLayer(nn.Module):
     """SENETLayer used in FiBiNET.
       Input shape
@@ -124,7 +159,6 @@ class SENETLayer(nn.Module):
         - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
 Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
     """
-
     def __init__(self, filed_size, reduction_ratio=3, seed=1024, device='cpu'):
         super(SENETLayer, self).__init__()
         self.seed = seed

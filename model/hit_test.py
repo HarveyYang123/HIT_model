@@ -13,7 +13,7 @@ from preprocessing.utils import Cosine_Similarity
 from preprocessing.utils import col_score
 from preprocessing.utils import col_score_2
 from preprocessing.utils import single_score
-from layers.interaction import SE_Block, ImplicitInteraction
+from layers.interaction import SENETLayer, ImplicitInteraction
 import torch.nn as nn
 from layers.activation import activation_layer
 from layers.interaction import LightSE
@@ -21,14 +21,14 @@ from preprocessing.utils import fe_score
 from layers.core import User_Fe_DNN,Item_Fe_DNN
 
 
-class HitTower(DualTowerForTim):
+class TimTower(DualTowerForTim):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
                  gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
                  dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
                  dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
                  item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
                  use_target=True, use_non_target=True):
-        super(HitTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
+        super(TimTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
 
@@ -55,6 +55,9 @@ class HitTower(DualTowerForTim):
         self.task = task
         self.device = device
         self.gpus = gpus
+        # self.user_aug_vector = None
+        # self.item_aug_vector = None
+        # self.user_dnn_embedding = None
 
         self.user_filed_size = user_filed_size
         self.item_filed_size = item_filed_size
@@ -89,7 +92,6 @@ class HitTower(DualTowerForTim):
             input_item_dim += self.hidden_units_for_recon[-1]
 
         if len(user_dnn_feature_columns) > 0:
-            self.User_SE = SE_Block(input_user_dim, 3, seed, device)
             self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                            use_bn=dnn_use_bn, user_head=user_head, init_std=init_std, device=device)
@@ -99,7 +101,6 @@ class HitTower(DualTowerForTim):
             self.user_dnn_embedding = None
 
         if len(item_dnn_feature_columns) > 0:
-            self.Item_SE = SE_Block(input_item_dim, 3, seed, device)
             self.item_fe_dnn = Item_Fe_DNN(input_item_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                            use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
@@ -107,6 +108,8 @@ class HitTower(DualTowerForTim):
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.item_dnn_embedding = None
+        # self.User_SE = SENETLayer(self.user_filed_size, 3, seed, device)
+        # self.Item_SE = SENETLayer(self.item_filed_size, 3, seed, device)
 
         # self.dense = torch.nn.Linear(128*len(self.user_dnn_feature_columns),1).cuda()
         #
@@ -157,11 +160,14 @@ class HitTower(DualTowerForTim):
             # else:
             #     user_dnn_input = sparse_dnn_input
 
+
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
-            user_se_emd = self.User_SE(user_dnn_input)
-            self.user_fe_rep = self.user_fe_dnn(user_se_emd)
+
+            self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
+
+
 
         # item tower
         if len(self.item_dnn_feature_columns) > 0:
@@ -207,9 +213,11 @@ class HitTower(DualTowerForTim):
 
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
-            item_se_emb = self.Item_SE(item_dnn_input)
-            self.item_fe_rep = self.item_fe_dnn(item_se_emb)
+
+            self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
+
+
 
 
         if len(self.user_dnn_feature_columns) > 0 and len(self.item_dnn_feature_columns) > 0:

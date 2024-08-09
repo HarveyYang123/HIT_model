@@ -198,7 +198,6 @@ class User_Fe_DNN(nn.Module):
         if self.only_output_fe:
             for i in range(len(self.Fe_linears)):
                 user_temp = self.Fe_linears[i](deep_input)
-                # print("item_col_rep", item_temp.shape)
                 if i == len(self.Fe_linears) - 1 and self.use_kan:
                     user_temp = self.kan_dense(user_temp)
 
