@@ -55,7 +55,8 @@ def main(args, log):
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
                         dnn_feature_columns, dropout, device, log, data_name="Amazon",
                         user_feature_columns_for_recon=AmazonData.user_feature_columns_for_recon,
-                        item_feature_columns_for_recon=AmazonData.item_feature_columns_for_recon)
+                        item_feature_columns_for_recon=AmazonData.item_feature_columns_for_recon,
+                        ouput_head=args.ouput_head)
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
     model.fit(AmazonData.train_model_input, AmazonData.train[AmazonData.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
@@ -69,12 +70,12 @@ def main(args, log):
     # Evaluate
     # 看下最佳模型在完整的训练集上的表现
     eval_tr = model.evaluate(AmazonData.train_model_input, AmazonData.train[AmazonData.target].values)
-    log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; evaluate:{eval_tr}")
 
     # %%
     pred_ts = model.predict(AmazonData.test_model_input, batch_size=128)
-    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
-    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test LogLoss, {round(log_loss(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test AUC, {round(roc_auc_score(AmazonData.test[AmazonData.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -87,10 +88,11 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
     # parser.add_argument("--batch_size", type=int, default=2048)
-    parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--random_seed", type=int, default=1023)
+    parser.add_argument("--ouput_head", type=int, default=2)
     opt = parser.parse_args()
     log = Logger('./log/amazon_data.log', level='debug')
     main(opt, log)

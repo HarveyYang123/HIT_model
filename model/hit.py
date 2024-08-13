@@ -24,10 +24,9 @@ from layers.core import User_Fe_DNN,Item_Fe_DNN
 class HitTower(DualTowerForTim):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
                  gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
-                 dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
-                 dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
-                 item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
-                 use_target=True, use_non_target=True):
+                 dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_dropout=0, init_std=0.0001, seed=124,
+                 task='binary', device='cpu', gpus=None, user_filed_size = 5, item_filed_size = 2,
+                 hidden_units_for_recon=(32, 32), activation_for_recon='relu', use_target=True, use_non_target=True):
         super(HitTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
@@ -92,7 +91,8 @@ class HitTower(DualTowerForTim):
             self.User_SE = SE_Block(input_user_dim, 3, seed, device)
             self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                           use_bn=dnn_use_bn, user_head=user_head, init_std=init_std, device=device)
+                                           use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,
+                                           use_kan=True, only_output_fe=False, device=device)
             self.user_dnn = DNN(input_user_dim, dnn_hidden_units,
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
@@ -102,16 +102,12 @@ class HitTower(DualTowerForTim):
             self.Item_SE = SE_Block(input_item_dim, 3, seed, device)
             self.item_fe_dnn = Item_Fe_DNN(input_item_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
-                                           use_bn=dnn_use_bn, item_head=item_head, init_std=init_std, device=device)
+                                           use_bn=dnn_use_bn, item_head=item_head, init_std=init_std,
+                                           use_kan=True, device=device)
             self.item_dnn = DNN(input_item_dim, dnn_hidden_units,
                                 activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                 use_bn=dnn_use_bn, init_std=init_std, device=device)
             self.item_dnn_embedding = None
-
-        # self.dense = torch.nn.Linear(128*len(self.user_dnn_feature_columns),1).cuda()
-        #
-        # self.user_col_dense = torch.nn.Linear(128, 128*len(self.user_dnn_feature_columns)).cuda()
-        # self.item_col_dense = torch.nn.Linear(128, 128*len(self.item_dnn_feature_columns)).cuda()
 
     def forward(self, inputs):
         # user tower
@@ -125,8 +121,6 @@ class HitTower(DualTowerForTim):
             if torch.cuda.is_available():
                 target_recon_output_for_user = target_recon_output_for_user.cuda()
                 non_target_recon_output_for_user = non_target_recon_output_for_user.cuda()
-            # print(user_sparse_embedding_list,len(user_sparse_embedding_list))
-            # print(user_sparse_embedding_list[-1],user_sparse_embedding_list[-1].shape)
 
             # implicit interaction user start
             user_sparse_embedding_list_for_recon, user_dense_value_list_for_recon = \
@@ -148,18 +142,9 @@ class HitTower(DualTowerForTim):
                 user_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_user_new, dim=1))
             # implicit interaction user end
 
-            # user_sparse_embedding = torch.cat(user_sparse_embedding_list, dim=1)
-            # User_sim_embedding = self.User_sim_non_local(user_sparse_embedding)
-            # sparse_dnn_input = torch.flatten(User_sim_embedding, start_dim=1)
-            # if(len(user_dense_value_list)>0):
-            #     dense_dnn_input = torch.flatten(torch.cat(user_dense_value_list, dim=-1), start_dim=1)
-            #     user_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input],axis=-1)
-            # else:
-            #     user_dnn_input = sparse_dnn_input
-
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
-            user_se_emd = self.User_SE(user_dnn_input)
+            # user_se_emd = self.User_SE(user_dnn_input)
             self.user_fe_rep = self.user_fe_dnn(user_se_emd)
             self.user_dnn_embedding = self.user_fe_rep[-1]
 
@@ -190,7 +175,6 @@ class HitTower(DualTowerForTim):
                 item_sparse_embedding_list.append(torch.unsqueeze(target_recon_output_for_item_new, dim=1))
             if self.use_non_target:
                 non_target_recon_output_for_item = self.non_target_recon_item(target_recon_item_fc)
-
                 non_target_recon_output_for_item_new = non_target_recon_output_for_item.detach()
                 # non_target_recon_output_for_item_new = torch.nn.functional.normalize(
                 #     non_target_recon_output_for_item_new, p=2,
@@ -198,16 +182,9 @@ class HitTower(DualTowerForTim):
                 item_sparse_embedding_list.append(torch.unsqueeze(non_target_recon_output_for_item_new, dim=1))
             # implicit interaction user end
 
-
-            # item_sparse_embedding = torch.cat(item_sparse_embedding_list, dim=1)
-            # Item_sim_embedding = self.Item_sim_non_local(item_sparse_embedding)
-            # sparse_dnn_input = torch.flatten(Item_sim_embedding, start_dim=1)
-            # dense_dnn_input = torch.flatten(torch.cat(item_dense_value_list, dim=-1), start_dim=1)
-            # item_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)
-
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
-            item_se_emb = self.Item_SE(item_dnn_input)
+            # item_se_emb = self.Item_SE(item_dnn_input)
             self.item_fe_rep = self.item_fe_dnn(item_se_emb)
             self.item_dnn_embedding = self.item_fe_rep[-1]
 

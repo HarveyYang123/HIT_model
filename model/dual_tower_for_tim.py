@@ -17,8 +17,11 @@ from preprocessing.utils import slice_arrays
 from tensorflow.python.keras.callbacks import CallbackList
 from preprocessing.callbacks import History
 from preprocessing.utils import contrast_loss
-# from preprocessing.utils import generation_cosine_loss_v2 as generation_cosine_loss
-from preprocessing.utils import generation_cosine_loss
+from preprocessing.utils import generation_ed_loss as generation_cosine_loss
+# from preprocessing.utils import generation_md_loss as generation_cosine_loss
+# from preprocessing.utils import generation_mae_loss as generation_cosine_loss
+# from preprocessing.utils import generation_mse_loss as generation_cosine_loss
+# from preprocessing.utils import generation_cosine_loss
 
 
 class DualTowerForTim(nn.Module):

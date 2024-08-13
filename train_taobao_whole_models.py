@@ -58,7 +58,8 @@ def main(args, log):
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
                         dnn_feature_columns, dropout, device, log, data_name="taobao",
                         user_feature_columns_for_recon=taobaoData.user_feature_columns_for_recon,
-                        item_feature_columns_for_recon=taobaoData.item_feature_columns_for_recon)
+                        item_feature_columns_for_recon=taobaoData.item_feature_columns_for_recon,
+                        ouput_head=args.ouput_head)
     
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
     # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
@@ -74,12 +75,12 @@ def main(args, log):
     # 6.Evaluate
     # 看下最佳模型在完整的训练集上的表现
     eval_tr = model.evaluate(taobaoData.train_model_input, taobaoData.train[taobaoData.target].values)
-    log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; evaluate:{eval_tr}")
 
     # %%
     pred_ts = model.predict(taobaoData.test_model_input, batch_size=2048)
-    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(taobaoData.test[taobaoData.target].values, pred_ts), 4)}")
-    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(taobaoData.test[taobaoData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test LogLoss, {round(log_loss(taobaoData.test[taobaoData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test AUC, {round(roc_auc_score(taobaoData.test[taobaoData.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -102,6 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--sample_rate", type=float, default=0.3)
+    parser.add_argument("--ouput_head", type=int, default=2)
     opt = parser.parse_args()
     log = Logger('./log/taobao_data.log', level='debug')
     main(opt, log)

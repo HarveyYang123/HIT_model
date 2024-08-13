@@ -25,9 +25,9 @@ def main(args, log):
     setup_seed(seed=args.random_seed)
 
     ckpt_path = '{}/{}.ckpt'.format(ckpt_fold, model_name)
-    # 检查文件夹是否存在
+
+    # check path exist
     if not os.path.exists(ckpt_fold):
-        # 如果文件夹不存在，则创建文件夹
         os.makedirs(ckpt_fold)
         log.logger.info(f"the fold '{ckpt_fold}' is created now.")
     else:
@@ -46,7 +46,6 @@ def main(args, log):
     mdckpt = ModelCheckpoint(filepath=ckpt_path, monitor='val_auc',
                              mode='max', verbose=1, save_best_only=True, save_weights_only=True)
 
-    # 仅用于非双塔的模型
     linear_feature_columns = movieData.user_feature_columns + movieData.item_feature_columns
     user_feature_columns = movieData.user_feature_columns
     item_feature_columns = movieData.item_feature_columns
@@ -55,25 +54,22 @@ def main(args, log):
     model = chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
                         dnn_feature_columns, dropout, device, log, data_name="movieLens",
                         user_feature_columns_for_recon=movieData.user_feature_columns_for_recon,
-                        item_feature_columns_for_recon=movieData.item_feature_columns_for_recon)
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss']
-                  , lr=lr)
-    # 因为加了early stopping，所以保留的模型是在验证集上val_auc表现最好的模型
-    model.fit(movieData.train_model_input, movieData.train[movieData.target].values, batch_size=batch_size, epochs=epoch, verbose=2,
-              validation_split=0.2,
-              callbacks=[es, mdckpt])
+                        item_feature_columns_for_recon=movieData.item_feature_columns_for_recon,
+                        ouput_head=args.ouput_head)
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['auc', 'accuracy', 'logloss'], lr=lr)
+    model.fit(movieData.train_model_input, movieData.train[movieData.target].values, batch_size=batch_size,
+              epochs=epoch, verbose=2, validation_split=0.2, callbacks=[es, mdckpt])
 
     model.load_state_dict(torch.load(ckpt_path))
     model.eval()
 
     # Evaluate
     eval_tr = model.evaluate(movieData.train_model_input, movieData.train[movieData.target].values)
-    log.logger.info(f"model_name = {model_name}; evaluate:{eval_tr}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; evaluate:{eval_tr}")
 
-    # %%
     pred_ts = model.predict(movieData.test_model_input, batch_size=2048)
-    log.logger.info(f"model_name = {model_name}; test LogLoss, {round(log_loss(movieData.test[movieData.target].values, pred_ts), 4)}")
-    log.logger.info(f"model_name = {model_name}; test AUC, {round(roc_auc_score(movieData.test[movieData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test LogLoss, {round(log_loss(movieData.test[movieData.target].values, pred_ts), 4)}")
+    log.logger.info(f"model_name = {model_name}; ouput_head = {args.ouput_head}; test AUC, {round(roc_auc_score(movieData.test[movieData.target].values, pred_ts), 4)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -86,10 +82,11 @@ if __name__ == "__main__":
     parser.add_argument("--cuda_number", type=str, default="cuda:1")
     parser.add_argument("--embedding_dim", type=int, default=32)
     parser.add_argument("--epoch", type=int, default=30)
-    parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--random_seed", type=int, default=1023)
+    parser.add_argument("--ouput_head", type=int, default=2)
     opt = parser.parse_args()
     log = Logger('./log/movielens_data.log', level='debug')
     main(opt, log)

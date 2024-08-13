@@ -64,7 +64,7 @@ class movieDataProcess():
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
 
-        # 处理序列特征
+        # 3.process sequence feature
         item_varlen_feature_columns = [
             VarLenSparseFeat(SparseFeat('genres', vocabulary_size=1000, embedding_dim=embedding_dim),
                              maxlen=genres_maxlen, combiner='mean', length_name=None)]
@@ -73,14 +73,15 @@ class movieDataProcess():
             VarLenSparseFeat(SparseFeat('user_hist', vocabulary_size=4000, embedding_dim=embedding_dim),
                              maxlen=user_maxlen, combiner='mean', length_name=None)]
 
-        # 3.generate input data for model
+        # 4.generate input data for model
         self.user_feature_columns = user_feature_columns + user_varlen_feature_columns
         self.item_feature_columns = item_feature_columns + item_varlen_feature_columns
 
-        # self.user_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
-        #                         for i, feat in enumerate(user_sparse_features)] + user_varlen_feature_columns
-        # self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
-        #                         for i, feat in enumerate(item_sparse_features)] + item_varlen_feature_columns
+        # all Feature
+        # self.user_feature_columns_for_recon = self.user_feature_columns
+        # self.item_feature_columns_for_recon = self.item_feature_columns
+
+        # Selected Features
         self.user_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(user_feature_for_recon)]
         self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
@@ -163,7 +164,6 @@ class movieDataProcess():
         test_hist = pad_sequences(test_hist, maxlen=max_len, padding='post')
         return test_hist
 
-
 class amazonDataProcess():
     def __init__(self, log, data_path, embedding_dim):
         data = self.data_process(data_path)
@@ -195,8 +195,11 @@ class amazonDataProcess():
         self.item_feature_columns = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
-
+        # all Feature
         self.user_feature_columns_for_recon = self.user_feature_columns
+        # self.item_feature_columns_for_recon = self.item_feature_columns
+
+        # select Feature
         self.item_feature_columns_for_recon = [SparseFeat(feat, data[feat].nunique(), embedding_dim=embedding_dim)
                                                for i, feat in enumerate(item_sparse_features)]
 
@@ -287,6 +290,11 @@ class taobaoDataProcess():
                                 for i, feat in enumerate(item_sparse_features)] + [DenseFeat(feat, 1, ) for feat in
                                                                                    item_dense_features]
 
+        # # all Feature
+        # self.user_feature_columns_for_recon = self.user_feature_columns
+        # self.test_model_input = self.item_feature_columns
+
+        # Select Feature
         user_sparse_features_recon = ['cms_segid', 'cms_group_id', 'final_gender_code', 'age_level',
                                       'pvalue_level', 'shopping_level', 'occupation', 'new_user_class_level', ]
         item_sparse_features_recon = ['cate_id', 'customer', 'brand', 'pid']
