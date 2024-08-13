@@ -51,7 +51,7 @@ python train_movielens_whole_models.py --model_name hit
   
   
  # [Performance](#contents)
- ![avatar](./figure/performance.PNG)
+ ![avatar](./figure/performance.png)
 
 ## cite our work
 ```
