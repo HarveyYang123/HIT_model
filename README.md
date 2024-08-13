@@ -13,10 +13,8 @@ python train_movielens_whole_models.py --model_name hit
 ![avatar](./figure/model.png)
 # Contents
 - [Contents](#contents)
-- [IntTower Description](#IntTower-description)
 - [Dataset](#dataset)
 - [Environment Requirements](#environment-requirements)
-- [Quick Start](#quick-start)
 - [Performance](#performance)
 
 
@@ -51,7 +49,7 @@ python train_movielens_whole_models.py --model_name hit
   
   
  # [Performance](#contents)
- ![avatar](./figure/performance.png)
+ ![avatar](./figure/performance.PNG)
 
 ## cite our work
 ```
