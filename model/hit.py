@@ -145,7 +145,7 @@ class HitTower(DualTowerForTim):
             user_dnn_input = combined_dnn_input(user_sparse_embedding_list, user_dense_value_list)
             # self.user_dnn_embedding = self.user_dnn(user_dnn_input)
             # user_se_emd = self.User_SE(user_dnn_input)
-            self.user_fe_rep = self.user_fe_dnn(user_se_emd)
+            self.user_fe_rep = self.user_fe_dnn(user_dnn_input)
             self.user_dnn_embedding = self.user_fe_rep[-1]
 
         # item tower
@@ -185,7 +185,7 @@ class HitTower(DualTowerForTim):
             item_dnn_input = combined_dnn_input(item_sparse_embedding_list, item_dense_value_list)
             # self.item_dnn_embedding = self.item_dnn(item_dnn_input)
             # item_se_emb = self.Item_SE(item_dnn_input)
-            self.item_fe_rep = self.item_fe_dnn(item_se_emb)
+            self.item_fe_rep = self.item_fe_dnn(item_dnn_input)
             self.item_dnn_embedding = self.item_fe_rep[-1]
 
 
