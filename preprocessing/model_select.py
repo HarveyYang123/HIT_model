@@ -64,7 +64,7 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                          item_input_for_recon=item_feature_columns_for_recon, field_dim = field_dim,
                          user_head=ouput_head, item_head=ouput_head,
                          task='binary', dnn_dropout=dropout, device=device, activation_for_recon='relu',
-                         hidden_units_for_recon=(128, hidden_dim), use_target=True, use_non_target=True)
+                         hidden_units_for_recon=(hidden_dim, hidden_dim), use_target=True, use_non_target=True)
     elif model_name == "kanTim":
         log.logger.info("model_name kanTim")
         model = KanTimTower(user_feature_columns, item_feature_columns,
