@@ -10,7 +10,6 @@ from model.wdm import WideDeep
 from model.hit import HitTower
 from model.poly_encoder import PolyEncoder
 from model.mvke import MVKE
-from model.KAN_TimTower import KanTimTower
 
 
 def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_feature_columns,
@@ -19,8 +18,18 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                 ouput_head=2):
     if model_name == "int_tower":
         log.logger.info("model_name int_tower")
-        model = IntTower(user_feature_columns, item_feature_columns, field_dim=16, task='binary', dnn_dropout=dropout,
+        if data_name == "Amazon":
+            model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary',
+                             dnn_dropout=dropout, device=device, user_head=32, item_head=32, user_filed_size=1,
+                             item_filed_size=2)
+        elif data_name == "taobao":
+            model = IntTower(user_feature_columns, item_feature_columns, field_dim=16, task='binary',
+                         dnn_dropout=dropout,
                          device=device, user_head=32, item_head=32, user_filed_size=9, item_filed_size=6)
+        else:
+            model = IntTower(user_feature_columns, item_feature_columns, field_dim=64, task='binary',
+                             dnn_dropout=dropout, device=device, user_head=2, item_head=2, user_filed_size=5,
+                             item_filed_size=2)
     elif model_name == "dssm":
         log.logger.info("model_name dssm")
         model = DSSM(user_feature_columns, item_feature_columns, task='binary', device=device)
@@ -65,13 +74,6 @@ def chooseModel(model_name, user_feature_columns, item_feature_columns, linear_f
                          user_head=ouput_head, item_head=ouput_head,
                          task='binary', dnn_dropout=dropout, device=device, activation_for_recon='relu',
                          hidden_units_for_recon=(hidden_dim, hidden_dim), use_target=True, use_non_target=True)
-    elif model_name == "kanTim":
-        log.logger.info("model_name kanTim")
-        model = KanTimTower(user_feature_columns, item_feature_columns,
-                         user_input_for_recon=user_feature_columns_for_recon,
-                         item_input_for_recon=item_feature_columns_for_recon,
-                         task='binary', dnn_dropout=dropout, device=device, activation_for_recon='relu',
-                         use_target=True, use_non_target=True)
     else:
         log.logger.info("model_name wide_and_deep")
         model = WideDeep(linear_feature_columns, dnn_feature_columns, task='binary',

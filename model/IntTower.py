@@ -75,7 +75,7 @@ class IntTower(BaseTower):
             sparse_dnn_input = torch.flatten(User_sim_embedding, start_dim=1)
             if(len(user_dense_value_list)>0):
                 dense_dnn_input = torch.flatten(torch.cat(user_dense_value_list, dim=-1), start_dim=1)
-                user_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input],axis=-1)
+                user_dnn_input = torch.cat([sparse_dnn_input, dense_dnn_input], axis=-1)
             else:
                 user_dnn_input = sparse_dnn_input
 

@@ -59,12 +59,11 @@ class ImplicitInteraction(nn.Module):
             if self.use_bn and fc.size()[0] > 1:
                 fc = self.bn[i](fc)
             fc = self.activation_layers[i](fc)
-            # if i != len(self.linears) - 1:
-            #     fc = self.dropout(fc)
-            fc = self.dropout(fc)
+            if i != len(self.linears) - 1:
+                fc = self.dropout(fc)
             deep_input = fc
         # # l2 norm
-        deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
+        # deep_input = torch.nn.functional.normalize(deep_input, p=2, dim=-1)
         return deep_input
 
 class LightSE(nn.Module):
@@ -110,23 +109,6 @@ class LightSE(nn.Module):
 
 
 
-# class SEBlock1D(nn.Module):
-#     def __init__(self, in_channels, reduction_ratio=16):
-#         super(SEBlock1D, self).__init__()
-#         self.squeeze = nn.AdaptiveAvgPool1d(1)
-#         self.excitation = nn.Sequential(
-#             nn.Linear(in_channels, in_channels // reduction_ratio),
-#             nn.ReLU(inplace=True),
-#             nn.Linear(in_channels // reduction_ratio, in_channels),
-#             nn.Sigmoid()
-#         )
-#
-#     def forward(self, x):
-#         # x shape: [batch_size, in_channels, length]
-#         b, c, _ = x.size()
-#         y = self.squeeze(x).view(b, c)
-#         y = self.excitation(y).view(b, c, 1)
-#         return x * y.expand_as(x)
 class SE_Block(nn.Module):
     def __init__(self, num_features, reduction_ratio=16, seed=1024, device='cpu'):
         super(SE_Block, self).__init__()
@@ -159,6 +141,7 @@ class SENETLayer(nn.Module):
         - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
 Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
     """
+
     def __init__(self, filed_size, reduction_ratio=3, seed=1024, device='cpu'):
         super(SENETLayer, self).__init__()
         self.seed = seed
