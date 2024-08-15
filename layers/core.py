@@ -181,6 +181,7 @@ class User_Fe_DNN(nn.Module):
         deep_input = inputs
         self.user_fe_rep = []
         for i in range(len(self.linears)):
+
             fc = self.linears[i](deep_input)
             if not self.only_output_fe:
                 user_temp = self.Fe_linears[i](deep_input)
@@ -265,16 +266,12 @@ class Item_Fe_DNN(nn.Module):
 
             fc = self.dropout(fc)
             deep_input = fc
-
-
         for i in range(len(self.Fe_linears)):
             item_temp = self.Fe_linears[i](deep_input)
             # print("item_col_rep", item_temp.shape)
             if i == len(self.Fe_linears) - 1 and self.use_kan:
                 item_temp = self.kan_dense(item_temp)
-
             self.item_fe_rep.append(item_temp)
-
         return self.item_fe_rep
 
 
