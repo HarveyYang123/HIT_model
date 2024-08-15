@@ -7,6 +7,9 @@ plt.rcParams['pdf.fonttype'] = 42  # 这对于PDF输出很重要
 plt.rcParams['ps.fonttype'] = 42   # 这对于PostScript输出很重要
 
 
+plt.rcParams['xtick.labelsize'] = 20
+plt.rcParams['ytick.labelsize'] = 20
+plt.rcParams['axes.labelsize'] = 30
 # 假设这是你的数据
 data = {
     'head': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
@@ -22,22 +25,22 @@ data = {
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
 
 # 阿里巴巴 AUC
-ax1.plot(data['head'][:11], data['Alibaba_AUC'][:11], 'o-', label='Alibaba_AUC')
-ax1.plot(data['head'][:11], data['MovieLens_AUC'][:11], '^-', label='MovieLens_AUC')
-ax1.plot(data['head'][:11], data['Amazon_AUC'][:11], 'p-', label='Amazon_AUC')
+ax1.plot(data['head'][:11], data['Alibaba_AUC'][:11], 'o-', label='Alibaba')
+ax1.plot(data['head'][:11], data['MovieLens_AUC'][:11], '^-', label='MovieLens')
+ax1.plot(data['head'][:11], data['Amazon_AUC'][:11], 'p-', label='Amazon')
 ax1.set_xlabel('head number')
 ax1.set_ylabel('AUC')
 ax1.grid(True)
-ax1.legend()
+ax1.legend(prop={'family' : 'Times New Roman', 'size': 20})
 
 
-ax2.plot(data['head'][:11], data['Alibaba_Logloss'][:11], 'o-', label='Alibaba_Logloss')
-ax2.plot(data['head'][:11], data['MovieLens_Logloss'][:11], '^-', label='MovieLens_Logloss')
-ax2.plot(data['head'][:11], data['Amazon_Logloss'][:11], 'p-', label='Amazon_Logloss')
+ax2.plot(data['head'][:11], data['Alibaba_Logloss'][:11], 'o-', label='Alibaba')
+ax2.plot(data['head'][:11], data['MovieLens_Logloss'][:11], '^-', label='MovieLens')
+ax2.plot(data['head'][:11], data['Amazon_Logloss'][:11], 'p-', label='Amazon')
 ax2.set_xlabel('head number')
-ax2.set_ylabel('Logloss')
+ax2.set_ylabel('CEloss')
 ax2.grid(True)
-ax2.legend()
+ax2.legend(prop={'family' : 'Times New Roman', 'size': 20})
 
 
 # 调整子图布局
