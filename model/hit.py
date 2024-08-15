@@ -16,10 +16,10 @@ from layers.core import User_Fe_DNN,Item_Fe_DNN
 class HitTower(DualTowerForHit):
     def __init__(self, user_dnn_feature_columns, item_dnn_feature_columns, user_input_for_recon, item_input_for_recon,
                  gamma=1, dnn_use_bn=True, dnn_hidden_units=(300, 300, 32), field_dim = 16, user_head=2,item_head=2,
-                 dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_dropout=0, init_std=0.0001, seed=124,
-                 task='binary', device='cpu', gpus=None, user_filed_size = 5, item_filed_size = 2,
-                 hidden_units_for_recon=(32, 32), activation_for_recon='relu', use_target=True,
-                 use_non_target=True, only_output_fe=True):
+                 dnn_activation='relu', l2_reg_dnn=0, l2_reg_embedding=1e-5,
+                 dnn_dropout=0, init_std=0.0001, seed=124, task='binary', device='cpu', gpus=None, user_filed_size = 5,
+                 item_filed_size = 2, hidden_units_for_recon=(32, 32), activation_for_recon='relu',
+                 use_target=True, use_non_target=True, only_output_fe=True):
         super(HitTower, self).__init__(user_dnn_feature_columns, item_dnn_feature_columns,
                                        l2_reg_embedding=l2_reg_embedding, init_std=init_std, seed=seed, task=task,
                                        device=device, gpus=gpus, use_target=True, use_non_target=True)
@@ -82,7 +82,6 @@ class HitTower(DualTowerForHit):
             input_item_dim += self.hidden_units_for_recon[-1]
 
         if len(user_dnn_feature_columns) > 0:
-            # self.User_SE = SE_Block(input_user_dim, 3, seed, device)
             self.user_fe_dnn = User_Fe_DNN(input_user_dim, field_dim, dnn_hidden_units,
                                            activation=dnn_activation, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout,
                                            use_bn=dnn_use_bn, user_head=user_head, init_std=init_std,

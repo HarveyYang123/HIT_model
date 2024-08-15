@@ -6,32 +6,31 @@ import matplotlib.pyplot as plt
 plt.rcParams['pdf.fonttype'] = 42  # 这对于PDF输出很重要
 plt.rcParams['ps.fonttype'] = 42   # 这对于PostScript输出很重要
 
-plt.rcParams['xtick.labelsize'] = 30
-plt.rcParams['ytick.labelsize'] = 30
-plt.rcParams['axes.labelsize'] = 30
+plt.rcParams['xtick.labelsize'] = 20
+plt.rcParams['ytick.labelsize'] = 20
+plt.rcParams['axes.labelsize'] = 15
 
 
-fig, axs = plt.subplots(1, 1, figsize=(12, 4))
 
-names = ['HIT', 'Vanilla', 'Late', 'Early']
+fig, axs = plt.subplots(1, 1, figsize=(6, 4))
+
+names = ['HIT', 'Vanilla', 'Early', 'Late']
 data = {
-    'HIT-SuccessRate': [0.9999],
-    'Vanilla Two-tower-SuccessRate': [0.9999],
-    'Late Interaction-SuccessRate': [0.1878],
-    'Early Interaction-SuccessRate': [0.9994]
+    'HIT-SuccessRate': [0.99],
+    'Vanilla Two-tower-SuccessRate': [0.99],
+    'Early Interaction-SuccessRate': [0.99],
+    'Late Interaction-SuccessRate': [0.19]
 }
 
 
 values = [val[0] for val in data.values()]
 
-# 设置柱子之间的间距
-spacing = 0.1
 
-# 计算调整后的x轴位置
-x_positions = [i + spacing * i for i in range(len(names))]
+for i in range(len(names)):
+    axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
 
 axs.bar(names, values, width=0.5)
-axs.set_ylabel('Success Rate')
+axs.set_ylabel('Success Rate', fontsize=25)
 # axs.set_title('QPS=35000 Response Success Rate')
 axs.set_xticks(range(len(names)))
 axs.set_xticklabels(names)
