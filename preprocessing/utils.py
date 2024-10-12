@@ -143,14 +143,14 @@ def generation_cosine_loss(y, user_embedding, item_embedding, user_generator_vec
 
     if target:
         # positive samples
-        cosine_similarity_u = y * torch.sum(user_gen_norm * item_norm, dim=1)
-        cosine_similarity_v = y * torch.sum(item_gen_norm * user_norm, dim=1)
+        cosine_similarity_u = y * torch.sum(user_gen_norm * item_norm, dim=1, keepdim=True)
+        cosine_similarity_v = y * torch.sum(item_gen_norm * user_norm, dim=1, keepdim=True)
     else:
         # negative samples
         # You can define how to handle negative samples based on your task
         # For example, you can use the negative of the cosine similarity
-        cosine_similarity_u = (1 - y) * torch.sum(user_gen_norm * item_norm, dim=1)
-        cosine_similarity_v = (1 - y) * torch.sum(item_gen_norm * user_norm, dim=1)
+        cosine_similarity_u = (1 - y) * torch.sum(user_gen_norm * item_norm, dim=1, keepdim=True)
+        cosine_similarity_v = (1 - y) * torch.sum(item_gen_norm * user_norm, dim=1, keepdim=True)
 
     # convert cosine similarity to loss
     loss_u = cosine_similarity_u.mean()

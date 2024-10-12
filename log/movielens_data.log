@@ -1,0 +1,14 @@
+2024-10-12 16:37:59,949 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 16:38:00,096 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:68] - INFO: model_name hit
+2024-10-12 16:46:09,835 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 16:46:09,880 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:68] - INFO: model_name hit
+2024-10-12 16:49:33,505 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 16:49:33,569 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:60] - INFO: model_name auto_int
+2024-10-12 16:50:08,985 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 16:50:09,047 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:48] - INFO: model name deep_fm
+2024-10-12 16:51:54,138 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 16:51:54,217 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:48] - INFO: model name deep_fm
+2024-10-12 20:37:06,291 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 20:37:06,352 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:68] - INFO: model_name hit
+2024-10-12 20:38:50,262 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/train_movielens_whole_models.py[line:34] - INFO: the fold './checkpoints/movie' already exists.
+2024-10-12 20:38:50,306 - /Users/haoqiangyang/Documents/2024年下半年/TIM论文撰写/intTower_code/TIM_model/preprocessing/model_select.py[line:68] - INFO: model_name hit
