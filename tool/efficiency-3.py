@@ -24,8 +24,8 @@ data = {
 
 values = [val[0] for val in data.values()]
 
-for i in range(len(names)):
-    axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
+# for i in range(len(names)):
+#     axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
 
 
 axs.bar(names, values, width=0.5)

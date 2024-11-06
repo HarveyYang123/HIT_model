@@ -24,8 +24,8 @@ data = {
 values = [val[0] for val in data.values()]
 axs.bar(names, values, width=0.5)
 
-for i in range(len(names)):
-    axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
+# for i in range(len(names)):
+#     axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
 
 axs.set_ylabel('millisecond', fontsize=25)
 # axs.set_title('QPS=35000 Average Response Time')

@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 plt.rcParams['pdf.fonttype'] = 42  # 这对于PDF输出很重要
 plt.rcParams['ps.fonttype'] = 42   # 这对于PostScript输出很重要
 
-plt.rcParams['xtick.labelsize'] = 20
-plt.rcParams['ytick.labelsize'] = 20
+plt.rcParams['xtick.labelsize'] = 25
+plt.rcParams['ytick.labelsize'] = 25
 plt.rcParams['axes.labelsize'] = 15
 
 
@@ -26,8 +26,8 @@ data = {
 values = [val[0] for val in data.values()]
 
 
-for i in range(len(names)):
-    axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
+# for i in range(len(names)):
+#     axs.text(x=i, y=values[i], s=values[i], ha='center', fontsize=20)
 
 axs.bar(names, values, width=0.5)
 axs.set_ylabel('Success Rate', fontsize=25)

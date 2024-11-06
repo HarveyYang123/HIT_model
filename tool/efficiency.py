@@ -23,6 +23,8 @@ data = {
     'Early Interaction-SuccessRate': [0.9994, 0.8123]
 }
 
+QPS=35000,耗时由17.86毫秒降到 0.9643毫秒
+
 data_2 = {
     'HIT-SuccessRate': [0.9999],
     'Vanilla Two-tower-SuccessRate': [0.9999],
@@ -33,7 +35,7 @@ data_2 = {
 
 # HIT：https://adt-test.woa.com/#/reports/cupaiZhaohuiInfer/b-5259739900c84885adccce2ccc88782b
 # Vanilla Two-tower:https://adt-test.woa.com/#/reports/cupaiZhaohuiInfer/b-eea2e095bab54464b7683e06a16907c6
-# Late Interaction: https://adt-test.woa.com/#/reports/cupaiZhaohuiInfer/b-b0b8fa773de74540ae34a0eb7826b4ea
+# MVKE Late Interaction: https://adt-test.woa.com/#/reports/cupaiZhaohuiInfer/b-b0b8fa773de74540ae34a0eb7826b4ea
 # Early Interaction: https://adt-test.woa.com/#/reports/cupaiZhaohuiInfer/b-8e78d2489bc942ec82f89b4b91141a43
 # 创建一个大图和子图
 fig, axs = plt.subplots(2, 2, figsize=(12, 4))

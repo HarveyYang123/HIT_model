@@ -24,9 +24,9 @@ data = {
 fig, ax2 = plt.subplots(1, 1, figsize=(6, 4))
 
 
-ax2.plot(data['head'][:11], data['Alibaba_Logloss'][:11], 'o-', label='Alibaba')
-ax2.plot(data['head'][:11], data['MovieLens_Logloss'][:11], '^-', label='MovieLens')
-ax2.plot(data['head'][:11], data['Amazon_Logloss'][:11], 'p-', label='Amazon')
+ax2.plot(data['head'][:6], data['Alibaba_Logloss'][:6], 'o-', label='Alibaba')
+ax2.plot(data['head'][:6], data['MovieLens_Logloss'][:6], '^-', label='MovieLens')
+ax2.plot(data['head'][:6], data['Amazon_Logloss'][:6], 'p-', label='Amazon')
 ax2.set_xlabel('# heads.', fontsize=30)
 # ax2.set_ylabel('CEloss')
 ax2.grid(True)

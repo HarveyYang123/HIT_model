@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #nohup sh run.sh >tmp.log 2>&1 &
-arr=("int_tower" "dssm"  "dat" "deep_fm" "dcn" "cold" "auto_int" "wide_and_deep" "tim" "kan_Tim")
+arr=("int_tower" "dssm" "poly_encoder" "MVKE" "dat" "deep_fm" "dcn" "cold" "auto_int" "wide_and_deep" "hit" "kanTim")
 
 # 定义目录路径
 movielens_path="./log/movielens_shell_log"
