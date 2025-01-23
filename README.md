@@ -1,7 +1,7 @@
 # Description
-- Problem solved: We propose a Hybrid Interaction Two-Tower (HIT) model for the pre-ranking system. Without compromising computational efficiency, the extensive two-tower interaction significantly improves the calculation performance.
-- Module details: In the two-tower model, we propose a hybrid interaction method that combines early-interaction and late-interaction, which are implemented through a generator and a Multi-Head Representer, respectively. The generator achieves early-interaction by generating high-dimensional embeddings for users or ads. The Multi-Head Representer implements late-interaction by mapping user or ad embeddings to multiple different dimensional heads, and calculating similarity between different heads.
-- Results: We conducted a comprehensive evaluation on public and industrial datasets, and the results showed that the HIT model achieved the best performance in all cases. We also fully revealed the mechanism of hybrid interaction. In the online A/B test of the advertisement system, the HIT model increased the overall GMV by 1.6623%. After full implementation, it achieved significant economic benefits.
+Pre-ranking systems in online display advertising play a critical role in efficiently filtering millions of candidate advertisements for each user within a very short time while maintaining high prediction accuracy. In the user-ad matching process, there are correlations between users(or ads) and target or non-target ads(or users), and all users and ads have multi-dimensional characteristics. However, existing models do not account for these factors, resulting in limited performance. As a result, existing models often struggle to effectively address two key challenges: establishing latent correlations between basic user/ad features and their high-level embeddings, and capturing the multi-faceted interests of users and the multi-dimensional attributes of ads.
+To overcome these limitations, we propose the Hybrid Interaction-Enhanced Two-Tower (HIT) model, which introduces two novel components: a  \textbf{generator} and a \textbf{multi-head representer}. The generator bridges basic user/ad features from the early stages with subsequent high-level representations, fostering a more precise understanding of user preferences and ad attributes by constructing their connections.
+The multi-head representer employs multiple linear projections to derive diverse representations of users’ multi-faceted interests and ads’ multi-dimensional attributes. Moreover, the HIT model retains the efficiency of the two-tower architecture, allowing for pre-computation of ad embeddings, thereby addressing inference efficiency and computational effectiveness. Extensive experiments on public datasets demonstrate that HIT achieves state-of-the-art performance, while large-scale online A/B tests show a 1.66\% increase in Gross Merchandise Volume and a 1.55\% improvement in Return on Investment, all without incurring excessive computational overhead. The HIT model is now deployed in a real-world advertising platform, impacting billions of daily user interactions.
 ## Easy to use
 ``` shell
 pip install -r requirements.txt
@@ -50,8 +50,5 @@ python train_movielens_whole_models.py --model_name hit
   
  # [Performance](#contents)
  ![avatar](./figure/performance.PNG)
-
-## cite our work
-```
 ```
 
