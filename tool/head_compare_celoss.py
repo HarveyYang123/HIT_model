@@ -32,7 +32,7 @@ ax2.set_xlim(1, 6)
 ax2.set_ylim(0.2, 0.35)
 # ax2.set_ylabel('CEloss')
 ax2.grid(True)
-ax2.legend(loc='center left', prop={'family': 'Times New Roman', 'size': 22})
+ax2.legend(loc='lower right', prop={'family': 'Times New Roman', 'size': 22})
 
 # 调整子图布局
 plt.tight_layout()
