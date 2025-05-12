@@ -1,2 +1,7 @@
 2024-08-08 19:08:49,243 - D:\github\TIM_model\train_amazon_whole_models.py[line:34] - INFO: 文件夹'./checkpoints/amazon'已存在。
 2024-08-08 19:08:54,096 - D:\github\TIM_model\preprocessing\model_select.py[line:68] - INFO: model_name hit
+2025-05-12 13:03:11,709 - /Users/biglong.yuan/Documents/TIM_model/train_amazon_whole_models.py[line:32] - INFO: 文件夹'./checkpoints/amazon'已创建。
+2025-05-12 13:03:15,069 - /Users/biglong.yuan/Documents/TIM_model/preprocessing/model_select.py[line:68] - INFO: model_name hit
+2025-05-12 13:25:05,156 - /Users/biglong.yuan/Documents/TIM_model/train_amazon_whole_models.py[line:73] - INFO: model_name = hit; ouput_head = 2; evaluate:{'auc': 0.8610779709865231, 'accuracy': 0.8406948141308366, 'logloss': 0.34318681078221663}
+2025-05-12 13:25:11,344 - /Users/biglong.yuan/Documents/TIM_model/train_amazon_whole_models.py[line:77] - INFO: model_name = hit; ouput_head = 2; test LogLoss, 0.3208
+2025-05-12 13:25:11,415 - /Users/biglong.yuan/Documents/TIM_model/train_amazon_whole_models.py[line:78] - INFO: model_name = hit; ouput_head = 2; test AUC, 0.8796
