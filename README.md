@@ -1,7 +1,6 @@
 # Abstract
-Pre-ranking systems in online display advertising play a critical role in efficiently filtering millions of candidate advertisements for each user within a very short time while maintaining high prediction accuracy. In the user-ad matching process, there are correlations between users(or ads) and target or non-target ads(or users), and all users and ads have multi-dimensional characteristics. However, existing models do not account for these factors, resulting in limited performance. As a result, existing models often struggle to effectively address two key challenges: establishing latent correlations between basic user/ad features and their high-level embeddings, and capturing the multi-faceted interests of users and the multi-dimensional attributes of ads.
-To overcome these limitations, we propose the Hybrid Interaction-Enhanced Two-Tower (HIT) model, which introduces two novel components: a generator and a multi-head representer. The generator bridges basic user/ad features from the early stages with subsequent high-level representations, fostering a more precise understanding of user preferences and ad attributes by constructing their connections.
-The multi-head representer employs multiple linear projections to derive diverse representations of users’ multi-faceted interests and ads’ multi-dimensional attributes. Moreover, the HIT model retains the efficiency of the two-tower architecture, allowing for pre-computation of ad embeddings, thereby addressing inference efficiency and computational effectiveness. Extensive experiments on public datasets demonstrate that HIT achieves state-of-the-art performance, while large-scale online A/B tests show a 1.66% increase in Gross Merchandise Volume and a 1.55% improvement in Return on Investment, all without incurring excessive computational overhead. The HIT model is now deployed in a real-world advertising platform, impacting billions of daily user interactions.
+Online display advertising platforms rely on pre-ranking systems to efficiently filter and prioritize candidate ads from vast corpora, balancing relevance to users with strict computational constraints. The prevailing two-tower architecture, though highly efficient due to its decoupled design and pre-caching, suffers from cross-domain interaction and coarse similarity metrics, undermining its capacity to model complex user-ad relationships. In this study, we propose the Hierarchical Interaction-Enhanced Two-Tower (HIT) model, a new architecture that augments the two-tower paradigm with two key components: \textit{generators} that pre-generate holistic embeddings incorporating coarse-grained user-ad interactions via a dual-generator framework and cosine-similarity-based training objective, and \textit{multi-head representers} that project embeddings into multiple latent subspaces to capture fine-grained, multi-faceted user interests and multi-dimensional ad attributes. This design enhances modeling fidelity without compromising inference efficiency. Extensive experiments on public datasets and large-scale online A/B testing on Tencent's advertising platform demonstrate that HIT significantly outperforms several baselines in relevance metrics, yielding a 1.66\% increase in Gross Merchandise Volume and a 1.55\% improvement in Return on Investment, alongside similar serving latency to the vanilla two-tower models. The HIT model has been successfully deployed in Tencent's online display advertising system, serving billions of impressions daily.
+
 ## Easy to use
 ``` shell
 pip install -r requirements.txt
@@ -9,9 +8,12 @@ python train_amazon_whole_models.py --model_name hit
 python train_taobao_whole_models.py --model_name hit 
 python train_movielens_whole_models.py --model_name hit  
 ```
-## Source code of Paper "HIT Model: A Hybrid Interaction-Enhanced Two-Tower Model for Pre-Ranking System" 
+## Source code of Paper "HIT Model: A Hierarchical Interaction-Enhanced Two-Tower Model for Pre-Ranking Systems" 
 ![avatar](./figure/model.png)
 # Contents
+- [Abstract](#abstract)
+  - [Easy to use](#easy-to-use)
+  - [Source code of Paper "HIT Model: A Hierarchical Interaction-Enhanced Two-Tower Model for Pre-Ranking Systems"](#source-code-of-paper-hit-model-a-hierarchical-interaction-enhanced-two-tower-model-for-pre-ranking-systems)
 - [Contents](#contents)
 - [Dataset](#dataset)
 - [Environment Requirements](#environment-requirements)
@@ -49,4 +51,4 @@ python train_movielens_whole_models.py --model_name hit
   
   
  # [Performance](#contents)
- ![avatar](./figure/performance.PNG)
+ ![avatar](./figure/performance.png)
