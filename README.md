@@ -56,14 +56,16 @@ python train_movielens_whole_models.py --model_name hit
  # [Performance](#contents)
  ![avatar](./figure/performance.PNG)
 
- # [Citation]
+ # Citation
  If you use HIT model for your research, please cite our [paper](https://arxiv.org/abs/2505.19849):
 
->@article{yang2025hit,
+```bibtex
+@article{yang2025hit,
   title={HIT Model: A Hierarchical Interaction-Enhanced Two-Tower Model for Pre-Ranking Systems},
   author={Yang, Haoqiang and Yuan, Congde and Bai, Kun and Guo, Mengzhuo and Yang, Wei and Zhou, Chao},
   journal={arXiv preprint arXiv:2505.19849},
   year={2025}
 }
+```
 
   
